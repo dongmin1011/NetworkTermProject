@@ -10,6 +10,17 @@ class Node<T> {
         this.data = data;
         this.next = null;
     }
+    public T getData() {
+        return data;
+    }
+
+    public void setNextNode(Node<T> nextNode) {
+        this.next = nextNode;
+    }
+
+    public Node<T> getNextNode() {
+        return next;
+    }
 }
 
 // 링크드리스트 클래스
@@ -81,4 +92,17 @@ public class LinkedList<T> {
             System.out.println("Node with data " + oldData + " not found in the LinkedList.");
         }
     }
+    public T getData(int nodeNumber) {
+        Node<T> currentNode = head;
+        int currentNumber = 1;
+        while (currentNode != null) {
+            if (currentNumber == nodeNumber) {
+                return currentNode.getData();
+            }
+            currentNumber++;
+            currentNode = currentNode.getNextNode();
+        }
+        return null;
+    }
+
 }
