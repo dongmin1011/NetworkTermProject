@@ -2,6 +2,7 @@ package NetwrokTermProject.Layout;
 
 
 import NetwrokTermProject.VendingMachine.VendingMachine;
+import NetwrokTermProject.file.FileIO;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -18,6 +19,7 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 
 public class AdminLayout  extends JFrame implements LayOutData{
+    FileIO file = new FileIO();
     VendingMachine machine = VendingMachine.getInstance();
     static int collect = 0;
 
@@ -184,14 +186,14 @@ public class AdminLayout  extends JFrame implements LayOutData{
             }
 
         });
-//        AdminMenu[3].addActionListener(e->{			//일별/월별 매출버튼 클릭시 동작
-//            dataClear();
-//            file.openSale();				//sale텍스트파일 open
-//        });
-//        AdminMenu[4].addActionListener(e->{			//재고 소진/추가 날짜버튼 클릭 시 동작
-//            dataClear();
-//            file.openExhaustion();			//exhaustion텍스트 파일 open
-//        });
+        AdminMenu[3].addActionListener(e->{			//일별/월별 매출버튼 클릭시 동작
+            dataClear();
+            file.openSale();				//sale텍스트파일 open
+        });
+        AdminMenu[4].addActionListener(e->{			//재고 소진/추가 날짜버튼 클릭 시 동작
+            dataClear();
+            file.openExhaustion();			//exhaustion텍스트 파일 open
+        });
         //수금 버튼 동작 설정
         collectbtn[0].addActionListener(e->collectmoney(0));
         collectbtn[1].addActionListener(e->collectmoney(1));
@@ -242,9 +244,9 @@ public class AdminLayout  extends JFrame implements LayOutData{
 //                MachineInfo.setText(s);
 //            }
             Calendar today = Calendar.getInstance();
-//            file.ExhaustionFileWrite(today.get(Calendar.YEAR )+"년 "+getToday(today.get(Calendar.MONTH )+1)+"월 "+getToday(today.get(Calendar.DATE ))+"일 "
-//                    + getToday(today.get(Calendar.HOUR_OF_DAY ))+"시 "+getToday(today.get(Calendar.MINUTE ))+"분 " +
-//                    machine.getDrinks(n).getName() +" 추가", true);		//음료수를 추가한 날짜를 파일에 저장
+            file.ExhaustionFileWrite(today.get(Calendar.YEAR )+"년 "+getToday(today.get(Calendar.MONTH )+1)+"월 "+getToday(today.get(Calendar.DATE ))+"일 "
+                    + getToday(today.get(Calendar.HOUR_OF_DAY ))+"시 "+getToday(today.get(Calendar.MINUTE ))+"분 " +
+                    machine.getDrinks(n).getName() +" 추가", true);		//음료수를 추가한 날짜를 파일에 저장
 
         }
 

@@ -3,6 +3,7 @@ package NetwrokTermProject.Layout;
 
 import NetwrokTermProject.Money.MoneyInF;
 import NetwrokTermProject.VendingMachine.VendingMachine;
+import NetwrokTermProject.file.FileIO;
 import NetwrokTermProject.user.User;
 
 import java.awt.*;
@@ -23,16 +24,18 @@ interface LayOutData{
     JTextArea MachineInfo = new JTextArea();		//자판기 정보 출력
     JLabel [] coincount = new JLabel[5];		//거스름돈에서 돈의 개수를 담는 레이블
 
-//    default String getToday(int n) {
-//        if(n>0&&n<10) {
-//            return "0"+n;
-//        }
-//        return Integer.toString(n);
-//    }
+    default String getToday(int n) {
+        if(n>0&&n<10) {
+            return "0"+n;
+        }
+        return Integer.toString(n);
+    }
 //    void Buttonfunc();
 }
 //@SuppressWarnings("serial")
 public class LayOut extends JFrame implements LayOutData{
+
+    FileIO file = new FileIO();		//파일 입출력 클래스 생성
     VendingMachine machine = VendingMachine.getInstance();
 
     JFrame f = new JFrame();
@@ -281,8 +284,8 @@ public class LayOut extends JFrame implements LayOutData{
 
                 machine.getDrinks(n).Sub();			//자판기에 있는 음료수의 재고를 줄임
 
-//                file.SaleFileWrite(today.get(Calendar.YEAR )+"년 "+getToday(today.get(Calendar.MONTH )+1)+"월 "+getToday(today.get(Calendar.DATE ))+"일 "+
-//                        machine.getDrinks(n).getName() +" "+ machine.getDrinks(n).getPrice() + "원", true);	//음료수 구입 내역을 파일에 이어서 씀
+                file.SaleFileWrite(today.get(Calendar.YEAR )+"년 "+getToday(today.get(Calendar.MONTH )+1)+"월 "+getToday(today.get(Calendar.DATE ))+"일 "+
+                        machine.getDrinks(n).getName() +" "+ machine.getDrinks(n).getPrice() + "원", true);	//음료수 구입 내역을 파일에 이어서 씀
 
 
                 machine.SubInput(machine.getDrinks(n).getPrice());		//자판기에 입력되어있는 돈에서 음료수의 가격을 뱀
