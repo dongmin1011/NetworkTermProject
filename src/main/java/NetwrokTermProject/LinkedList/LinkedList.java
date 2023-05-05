@@ -1,108 +1,134 @@
 package NetwrokTermProject.LinkedList;
 
-// 노드 클래스
-class Node<T> {
-    T data; // 노드의 데이터, 제네릭 타입으로 선언
-    Node<T> next; // 다음 노드를 가리키는 링크
+import java.util.NoSuchElementException;
 
-    // 생성자
+class Node<T> {
+    private T data;
+    private Node<T> next;
+
     public Node(T data) {
         this.data = data;
         this.next = null;
     }
+
     public T getData() {
         return data;
     }
 
-    public void setNextNode(Node<T> nextNode) {
-        this.next = nextNode;
+    public void setData(T data) {
+        this.data = data;
     }
 
-    public Node<T> getNextNode() {
+    public Node<T> getNext() {
         return next;
     }
+
+    public void setNext(Node<T> next) {
+        this.next = next;
+    }
+
 }
-
-// 링크드리스트 클래스
+// 노드 클래스
 public class LinkedList<T> {
-    Node<T> head; // 링크드리스트의 첫 번째 노드
 
-    // 생성자
+
+
+    private int size;
+    private Node<T> head;
+    private Node<T> tail;
+
     public LinkedList() {
         this.head = null;
+        this.tail = null;
+        this.size = 0;
     }
 
-    // 링크드리스트에 노드 추가
-    public void addNode(T data) {
-        Node<T> newNode = new Node<T>(data); // 새로운 노드 생성
+    public void add(T data) {
+        Node<T> newNode = new Node<>(data);
 
-        // 링크드리스트가 비어있는 경우
         if (head == null) {
-            head = newNode; // 헤드 노드로 새로운 노드 설정
+            head = newNode;
+            tail = newNode;
+        } else {
+            tail.setNext(newNode);
+            tail = newNode;
+        }
+
+        size++;
+    }
+
+    public void remove(int index) {
+        if (index < 0 || index >= size) {
+            throw new IndexOutOfBoundsException("Index: " + index + ", Size: " + size);
+        }
+
+        if (index == 0) {
+            head = head.getNext();
+            if (head == null) {
+                tail = null;
+            }
+        } else {
+            Node<T> current = head;
+            for (int i = 0; i < index - 1; i++) {
+                current = current.getNext();
+            }
+
+            current.setNext(current.getNext().getNext());
+
+            if (current.getNext() == null) {
+                tail = current;
+            }
+        }
+
+        size--;
+    }
+    public T removeLast() {
+        if (isEmpty()) {
+            throw new NoSuchElementException("LinkedList is empty");
+        }
+
+        Node<T> removedNode;
+
+        if (size == 1) {
+            removedNode = head;
+            head = null;
+            tail = null;
         } else {
             Node<T> currentNode = head;
-            while (currentNode.next != null) {
-                currentNode = currentNode.next; // 현재 노드의 다음 노드로 이동
+            while (currentNode.getNext() != tail) {
+                currentNode = currentNode.getNext();
             }
-            currentNode.next = newNode; // 현재 노드의 다음 노드로 새로운 노드 설정
+            removedNode = tail;
+            tail = currentNode;
+            tail.setNext(null);
         }
+
+        size--;
+        return removedNode.getData();
     }
 
-    // 링크드리스트에서 노드 삭제
-    public void deleteNode(T data) {
-        if (head == null) {
-            System.out.println("LinkedList is empty.");
-            return;
+
+    public T get(int index) {
+        if (index < 0 || index >= size) {
+            throw new IndexOutOfBoundsException("Index: " + index + ", Size: " + size);
         }
 
-        if (head.data.equals(data)) {
-            head = head.next; // 헤드 노드를 다음 노드로 업데이트
-            return;
+        Node<T> current = head;
+        for (int i = 0; i < index; i++) {
+            current = current.getNext();
         }
 
-        Node<T> prevNode = head;
-        Node<T> currentNode = head.next;
-        while (currentNode != null && !currentNode.data.equals(data)) {
-            prevNode = currentNode;
-            currentNode = currentNode.next;
-        }
-
-        if (currentNode != null) {
-            prevNode.next = currentNode.next; // 이전 노드의 다음 노드를 현재 노드의 다음 노드로 연결하여 삭제
-        } else {
-            System.out.println("Node with data " + data + " not found in the LinkedList.");
-        }
+        return current.getData();
     }
 
-    // 링크드리스트에서 데이터 업데이트
-    public void updateNode(T oldData, T newData) {
-        if (head == null) {
-            System.out.println("LinkedList is empty.");
-            return;
-        }
-
-        Node<T> currentNode = head;
-        while (currentNode != null && !currentNode.data.equals(oldData)) {
-            currentNode = currentNode.next;
-        }
-
-        if (currentNode != null) {
-            currentNode.data = newData; // 현재 노드의 데이터를 새로운 데이터로 업데이트
-        } else {
-            System.out.println("Node with data " + oldData + " not found in the LinkedList.");
-        }
+    public int size() {
+        return size;
     }
-    public T getData(int nodeNumber) {
-        Node<T> currentNode = head;
-        int currentNumber = 1;
-        while (currentNode != null) {
-            if (currentNumber == nodeNumber) {
-                return currentNode.getData();
-            }
-            currentNumber++;
-            currentNode = currentNode.getNextNode();
-        }
-        return null;
+
+    public boolean isEmpty() {
+        return size == 0;
     }
+
 
 }
+

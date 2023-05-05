@@ -6,7 +6,8 @@ public abstract class AbstractDrink {
     protected int stock;	//재고
 
     public AbstractDrink() {
-        stock = 3;
+
+//        stock = 3;
     }
 //    boolean Stock_IsExist() {
 //        if(stock>0) return true;
