@@ -280,10 +280,10 @@ public class LayOut extends JFrame implements LayOutData{
         Calendar today = Calendar.getInstance();
 
         if(machine.getDrinks(n).getPrice()<=machine.getInput()) {	//자판기에 있는 돈보다 음료수의 가격이 쌀 경우(구입 가능)
-            if(machine.getDrinks(n).getStock()>0) {					//음료수의 재고가 남아있다면
+            if(machine.getStock(n)>0) {					//음료수의 재고가 남아있다면
 
-                machine.getDrinks(n).Sub();			//자판기에 있는 음료수의 재고를 줄임
-
+//                machine.getDrinks(n).Sub();			//자판기에 있는 음료수의 재고를 줄임
+                machine.SellDrink(n);
                 file.SaleFileWrite(today.get(Calendar.YEAR )+"년 "+getToday(today.get(Calendar.MONTH )+1)+"월 "+getToday(today.get(Calendar.DATE ))+"일 "+
                         machine.getDrinks(n).getName() +" "+ machine.getDrinks(n).getPrice() + "원", true);	//음료수 구입 내역을 파일에 이어서 씀
 
@@ -311,7 +311,7 @@ public class LayOut extends JFrame implements LayOutData{
             }
         }
 
-        if(machine.getDrinks(n).getStock()==0) {		//만약 음료수의 개수가 0개라면
+        if(machine.getStock(n)==0) {		//만약 음료수의 개수가 0개라면
             drinkbutton[n].setEnabled(false);			//음료수 클릭 불가
             drinkbutton[n].setText("품");				//음료수 버튼에 품절 표시
             drinkbutton[n].setBackground(Color.black);
@@ -339,7 +339,7 @@ public class LayOut extends JFrame implements LayOutData{
         }
         count = 0;
         for(int i=0; i<5; i++) {						//모든 음료수가 하나도 없다면
-            if(machine.getDrinks(i).getStock()==0)count++;
+            if(machine.getStock(i)==0)count++;
         }
         if(count==5) {									//MachineInfo에 음료수가 없다고 출력
             MachineInfo.append("음료수가 하나도 없습니다!\n");
@@ -468,7 +468,7 @@ public class LayOut extends JFrame implements LayOutData{
                     drinkbutton[j].setBackground(Color.black);
                     Drink_price[j].setText(Integer.toString(machine.getDrinks(j).getPrice())+"원");
                     drink_name[j].setText(machine.getDrinks(j).getName());
-                    if(machine.getDrinks(j).getStock()>0) drinkbutton[j].setText("");
+                    if(machine.getStock(j)>0) drinkbutton[j].setText("");
                 }
                 if(machine.getInput()==0) {							//만약 입력된 돈이 0원이라면
                     for(int i=0; i<5; i++) {
@@ -568,7 +568,7 @@ public class LayOut extends JFrame implements LayOutData{
                     drinkbutton[i].setEnabled(true);					//음료수 구입 가능
                     drinkbutton[i].setBackground(Color.red);			//음료수 버튼이 빨간색
                 }
-                if(machine.getDrinks(i).getStock()==0) {			//만약 음료수의 재고가 없다면
+                if(machine.getStock(i)==0) {			//만약 음료수의 재고가 없다면
                     drinkbutton[i].setEnabled(false);				//음료수 버튼 클릭 불가
                     drinkbutton[i].setText("품");					//품절 표시
                     drinkbutton[i].setBackground(Color.black);

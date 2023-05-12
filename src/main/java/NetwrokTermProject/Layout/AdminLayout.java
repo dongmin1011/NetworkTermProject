@@ -1,7 +1,9 @@
 package NetwrokTermProject.Layout;
 
 
+import NetwrokTermProject.VendingMachine.Drinks.*;
 import NetwrokTermProject.VendingMachine.VendingMachine;
+
 import NetwrokTermProject.file.FileIO;
 
 import java.awt.BorderLayout;
@@ -161,7 +163,7 @@ public class AdminLayout  extends JFrame implements LayOutData{
             dataClear();
             for(int i=0; i<5; i++) {		//info_label과 info_num의 데이터를 음료수와 개수를 출력할 수 있도록 설정
                 info_label[i].setText(machine.getDrinks(i).getName());
-                info_num[i].setText(Integer.toString(machine.getDrinks(i).getStock())+ "개");
+                info_num[i].setText(Integer.toString(machine.getStock(i))+ "개");
 
             }
         });
@@ -228,10 +230,14 @@ public class AdminLayout  extends JFrame implements LayOutData{
     void AccessDrinks(int n) {						//음료수 보충 함수
         InfoText.setText("");
         dataClear();								//Info초기화
-        if(machine.getDrinks(n).getStock() <10) {	//만약 음료수의 개수가 10개 이하라면
+        if(machine.getStock(n) <10) {	//만약 음료수의 개수가 10개 이하라면
 //            drinkbutton[n].setText("");				//drinkbutton을 ""로 초기화(품절표시를 없앰)
-            machine.getDrinks(n).Add();				//자판기의 음료수 개수 증가
-
+//            machine.getDrinks(n).Add();				//자판기의 음료수 개수 증가
+            if(n==0) machine.inputDrinks(new Water(), n);
+            else if(n==1) machine.inputDrinks(new Coffee(), n);
+            else if(n==2) machine.inputDrinks(new SportsDrink(), n);
+            else if(n==3) machine.inputDrinks(new HighQualityCoffee(), n);
+            else if(n==4)machine.inputDrinks(new Soda(), n);
 //            String s = MachineInfo.getText();
             String tempdrinkname = machine.getDrinks(n).getName();
             tempdrinkname += " 품절\n";
@@ -254,7 +260,7 @@ public class AdminLayout  extends JFrame implements LayOutData{
 
         for(int i=0; i<5; i++) {							//음료수의 재고 변화를 업데이트
             info_label[i].setText(machine.getDrinks(i).getName());
-            info_num[i].setText(Integer.toString(machine.getDrinks(i).getStock())+ "개");
+            info_num[i].setText(Integer.toString(machine.getStock(i))+ "개");
         }
 
     }

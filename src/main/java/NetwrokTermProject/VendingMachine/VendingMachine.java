@@ -2,10 +2,10 @@ package NetwrokTermProject.VendingMachine;
 
 import NetwrokTermProject.Admin.Admin;
 import NetwrokTermProject.LinkedList.LinkedList;
-import NetwrokTermProject.Money.Money;
 import NetwrokTermProject.Money.MoneyInF;
 import NetwrokTermProject.Money.*;
 import NetwrokTermProject.Stack.Stack;
+import NetwrokTermProject.VendingMachine.Drinks.*;
 
 //자판기 클래스
 public class VendingMachine{
@@ -29,26 +29,26 @@ public class VendingMachine{
         drink = new Stack<>();
         drinks = new LinkedList<>();
 
-//        for(int j=0; j<5; j++) {
-//            for (int i = 0; i < 3; i++) {
-//                if (j == 0) drink.push(new Water());
-//                if (j == 1) drink.push(new Coffee());
-//                if (j == 2) drink.push(new SportsDrink());
-//                if (j == 3) drink.push(new HighQualityCoffee());
-//                if (j == 4) drink.push(new Soda());
-//
-//
-//            }
-//            drinks.add(drink);
-//            drink = new Stack<>();
-//
-//        }
-        temp = new LinkedList<>();
-        temp.add(new Water());
-        temp.add(new Coffee());
-        temp.add(new SportsDrink());
-        temp.add(new HighQualityCoffee());
-        temp.add(new Soda());
+        for(int j=0; j<5; j++) {
+            for (int i = 0; i < 3; i++) {
+                if (j == 0) drink.push(new Water());
+                if (j == 1) drink.push(new Coffee());
+                if (j == 2) drink.push(new SportsDrink());
+                if (j == 3) drink.push(new HighQualityCoffee());
+                if (j == 4) drink.push(new Soda());
+
+
+            }
+            drinks.add(drink);
+            drink = new Stack<>();
+
+        }
+//        temp = new LinkedList<>();
+//        temp.add(new Water());
+//        temp.add(new Coffee());
+//        temp.add(new SportsDrink());
+//        temp.add(new HighQualityCoffee());
+//        temp.add(new Soda());
 
 //        drinks[0] = new Water();
 //        drinks[1] = (new Coffee());
@@ -90,7 +90,16 @@ public class VendingMachine{
     }
 
     public VendingMachineDrinks getDrinks(int n) {	//자판기 음료수 클래스 반환
-        return temp.get(n);
+        return (VendingMachineDrinks) drinks.get(n).peek();
+    }
+    public VendingMachineDrinks SellDrink(int n) {	//자판기 음료수 클래스 반환
+        return (VendingMachineDrinks) drinks.get(n).pop();
+    }
+    public int getStock(int n){
+        return drinks.get(n).size();
+    }
+    public void inputDrinks(VendingMachineDrinks temp, int n){
+        drinks.get(n).push(temp);
     }
 //    public int checkPrice(int n){
 ////        System.out.println("drinks = " + drinks.get(n).peek());

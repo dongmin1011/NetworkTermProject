@@ -28,35 +28,4 @@ public class VendingMachineDrinks {
         stock++;
     }
 }
-//음료수 클래스를 상속받는 물, 커피, 이온음료, 고급커피, 탄산음료 클래스
-class Water extends VendingMachineDrinks{
-    Water(){
-        name = "물";	//이름 지정
-        price = 450; //가격 지정
-    }
-}
-class Coffee extends VendingMachineDrinks{
-    Coffee(){
-        name = "커피";//이름 지정
-        price = 500;//가격 지정
-    }
-}
-class SportsDrink extends VendingMachineDrinks{
-    SportsDrink(){
-        name = "이온음료";	//이름 지정
-        price = 550;	//가격 지정
-    }
-}
-class HighQualityCoffee extends VendingMachineDrinks{
-    HighQualityCoffee(){
-        name = "고급커피";	//이름 지정
-        price = 700;	//가격 지정
-    }
-}
 
-class Soda extends VendingMachineDrinks{
-    Soda(){
-        name = "탄산음료";//이름 지정
-        price = 750;	//가격 지정
-    }
-}
