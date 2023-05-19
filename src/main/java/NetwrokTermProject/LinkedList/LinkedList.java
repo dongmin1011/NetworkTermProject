@@ -107,6 +107,18 @@ public class LinkedList<T> {
         return removedNode.getData();
     }
 
+    public void update(int index, T newData) {
+        if (index < 0 || index >= size) {
+            throw new IndexOutOfBoundsException("Index is out of range");
+        }
+
+        Node<T> currentNode = head;
+        for (int i = 0; i < index; i++) {
+            currentNode = currentNode.getNext();
+        }
+
+        currentNode.setData(newData);
+    }
 
     public T get(int index) {
         if (index < 0 || index >= size) {

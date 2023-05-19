@@ -9,6 +9,9 @@ import NetwrokTermProject.user.User;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.*;
+import java.net.Socket;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Calendar;
 
@@ -24,6 +27,8 @@ interface LayOutData{
     JTextArea MachineInfo = new JTextArea();		//자판기 정보 출력
     JLabel [] coincount = new JLabel[5];		//거스름돈에서 돈의 개수를 담는 레이블
 
+    String drinkName[] = new String[5];
+    int drinkPrice[] = new int[5];
     default String getToday(int n) {
         if(n>0&&n<10) {
             return "0"+n;
@@ -37,6 +42,9 @@ public class LayOut extends JFrame implements LayOutData{
 
     FileIO file = new FileIO();		//파일 입출력 클래스 생성
     VendingMachine machine = VendingMachine.getInstance();
+//    String drinkName[] = new String[5];
+//    int drinkPrice[] = new int[5];
+    
 
     JFrame f = new JFrame();
     User consumer = new User();
@@ -71,9 +79,11 @@ public class LayOut extends JFrame implements LayOutData{
     int [] change_cnt = new int[4];
     JTextArea usersdrink = new JTextArea();		//사용자가 뽑은 음료수 (반환버튼 누르면 삭제)
 
+    String serverIP = "localhost";
+    int serverPort = 12345;
 
     //자판기 화면의 레이아웃 생성
-    public LayOut() {
+    public LayOut(){
         f.setResizable(false);		//f프레임의 크기 변경 불가
         f.setPreferredSize(new Dimension(560, 720));
         int [] moneysize = {1000, 500, 100, 50, 10};
@@ -83,14 +93,19 @@ public class LayOut extends JFrame implements LayOutData{
         Drink_Grid.setBackground(Color.getHSBColor(360, 360, 360));	//Drink_grid의 배경색 지정
         Drink_Grid.setPreferredSize(new Dimension(540, 100));
 
+        for(int i=0; i<5; i++) {
+            drinkName[i] = machine.getDrinks(i).getName();
+            drinkPrice[i] = machine.getDrinks(i).getPrice();
+            
+        }
         //음료수 이름과 가격, 버튼을 생성하고 Drink_grid에 삽입
         for(int i=0; i<5; i++) {
-            drink_name[i]=new JLabel(machine.getDrinks(i).getName(), JLabel.CENTER);
+            drink_name[i]=new JLabel(drinkName[i], JLabel.CENTER);
             Drink_Grid.add(drink_name[i]);
         }
         for(int i=0; i<5; i++) {
             Drink_price[i] = new JLabel("", JLabel.CENTER);
-            Drink_price[i].setText("<HTML>"+ Integer.toString(machine.getDrinks(i).getPrice())+"원</HTML>" );
+            Drink_price[i].setText("<HTML>"+ Integer.toString(drinkPrice[i])+"원</HTML>" );
             Drink_Grid.add(Drink_price[i]);
         }
         for(int i=0; i<5; i++) {
@@ -238,25 +253,37 @@ public class LayOut extends JFrame implements LayOutData{
                 }
             }
         });
-        //Drink_data는 음료수 버튼을 클릭시 일어나는 동작을 정의
-        Drink_data();
+
+        try {
+            Socket socket = new Socket(serverIP, serverPort);
+            //Drink_data는 음료수 버튼을 클릭시 일어나는 동작을 정의
+            Drink_data(socket);
 //        //ReturnButton은 반환 버튼 클릭시 동작 정의
-        ReturnButton();
-        //Consumer_data는 사용자에 대한 정보와 돈 입력 정의
-        Consumer_data();
+            ReturnButton();
+            //Consumer_data는 사용자에 대한 정보와 돈 입력 정의
+            Consumer_data();
+
+
+        } catch (UnknownHostException e) {
+            throw new RuntimeException(e);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+
     }
-    void Drink_data() {
+    void Drink_data(Socket socket) {
         //음료수 버튼이 눌렸을 때의 동작 정의
-        drinkbutton[0].addActionListener(e->OrderDrink(0));
-        drinkbutton[1].addActionListener(e->OrderDrink(1));
-        drinkbutton[2].addActionListener(e->OrderDrink(2));
-        drinkbutton[3].addActionListener(e->OrderDrink(3));
-        drinkbutton[4].addActionListener(e->OrderDrink(4));
+        drinkbutton[0].addActionListener(e->OrderDrink(0,socket));
+        drinkbutton[1].addActionListener(e->OrderDrink(1, socket));
+        drinkbutton[2].addActionListener(e->OrderDrink(2, socket));
+        drinkbutton[3].addActionListener(e->OrderDrink(3,socket));
+        drinkbutton[4].addActionListener(e->OrderDrink(4,socket));
 
     }
 //
     //음료수 버튼을 눌렀을 때(매개변수는 음료의 위치)
-    void OrderDrink(int n) {
+    void OrderDrink(int n, Socket socket) {
         int count = 0;
         int []moneysize = {1000,500,100,50,10};
         for(int i=0; i<inputmoneylist.size(); ) {
@@ -279,16 +306,16 @@ public class LayOut extends JFrame implements LayOutData{
 
         Calendar today = Calendar.getInstance();
 
-        if(machine.getDrinks(n).getPrice()<=machine.getInput()) {	//자판기에 있는 돈보다 음료수의 가격이 쌀 경우(구입 가능)
+        if(drinkPrice[n]<=machine.getInput()) {	//자판기에 있는 돈보다 음료수의 가격이 쌀 경우(구입 가능)
             if(machine.getStock(n)>0) {					//음료수의 재고가 남아있다면
 
 //                machine.getDrinks(n).Sub();			//자판기에 있는 음료수의 재고를 줄임
                 machine.SellDrink(n);
                 file.SaleFileWrite(today.get(Calendar.YEAR )+"년 "+getToday(today.get(Calendar.MONTH )+1)+"월 "+getToday(today.get(Calendar.DATE ))+"일 "+
-                        machine.getDrinks(n).getName() +" "+ machine.getDrinks(n).getPrice() + "원", true);	//음료수 구입 내역을 파일에 이어서 씀
+                        drinkName[n] +" "+ drinkPrice[n] + "원", true);	//음료수 구입 내역을 파일에 이어서 씀
 
 
-                machine.SubInput(machine.getDrinks(n).getPrice());		//자판기에 입력되어있는 돈에서 음료수의 가격을 뱀
+                machine.SubInput(drinkPrice[n]);		//자판기에 입력되어있는 돈에서 음료수의 가격을 뱀
                 inputMoney.setText(Integer.toString(machine.getInput()));	//자판기에 입력되어 있는 돈을 inputMoney 필드에 업데이트
 
                 if(machine.getInput()-count*1000 < 0) {			//만약 자판기가 아직 사용하지 않은 1000원을 사용해야 한다면
@@ -296,8 +323,8 @@ public class LayOut extends JFrame implements LayOutData{
                     machine.getMoney(0).Add();		//자판기의 천원짜리 증가
                     inputmoneylist.remove(0);		//inputlist에 남아있는 천원 제거
                 }
-                GetDrinkName.setText(machine.getDrinks(n).getName());		//음료수 반환구에 뽑은 음료수 출력
-                usersdrink.append(machine.getDrinks(n).getName()+'\n');		//사용자가 뽑은 음료수 추가
+                GetDrinkName.setText(drinkName[n]);		//음료수 반환구에 뽑은 음료수 출력
+                usersdrink.append(drinkName[n]+'\n');		//사용자가 뽑은 음료수 추가
             }
             else {												//음료수의 재고가 없다면
                 drinkbutton[n].setEnabled(false);				//음료수버튼을 클릭불가
@@ -305,7 +332,7 @@ public class LayOut extends JFrame implements LayOutData{
             }
         }
         for(int i=0; i<5; i++) {
-            if(machine.getDrinks(i).getPrice() >machine.getInput()) {
+            if(drinkPrice[i] >machine.getInput()) {
                 drinkbutton[i].setEnabled(false);			//음료수의 가격이 더 비싸다면 음료수 버튼은 클릭 불가하고 검은색으로 바뀜
                 drinkbutton[i].setBackground(Color.black);
             }
@@ -321,10 +348,10 @@ public class LayOut extends JFrame implements LayOutData{
 //                    "월 "+getToday(today.get(Calendar.DATE ))+"일 "
 //                    + getToday(today.get(Calendar.HOUR_OF_DAY ))+"시 "+
 //                    getToday(today.get(Calendar.MINUTE ))+"분 "+ today.get(Calendar.SECOND )+"초 "+
-//                    machine.getDrinks(n).getName() +" 품절", true);	//파일에 품절 표시
+//                    drinkName[n]() +" 품절", true);	//파일에 품절 표시
 
             //MachineInfo(음료수 정보)에 품절된 음료수 표시
-            MachineInfo.append(machine.getDrinks(n).getName()+ " 품절\n");
+            MachineInfo.append(drinkName[n]+ " 품절\n");
         }
 
         String s = MachineInfo.getText();		//MachineInfo에 출력된 출력문 제거
@@ -344,6 +371,27 @@ public class LayOut extends JFrame implements LayOutData{
         if(count==5) {									//MachineInfo에 음료수가 없다고 출력
             MachineInfo.append("음료수가 하나도 없습니다!\n");
         }
+        try {
+            InputStream inputStream = socket.getInputStream();
+            OutputStream outputStream = socket.getOutputStream();
+//            BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
+            byte[] messageBytes = drinkName[n].getBytes();
+            outputStream.write(messageBytes);
+            outputStream.flush();
+            System.out.println("서버로 메시지를 전송했습니다.");
+
+            // 서버로부터 데이터 수신
+            byte[] buffer = new byte[1024];
+            int bytesRead = inputStream.read(buffer);
+            String receivedMessage = new String(buffer, 0, bytesRead);
+            System.out.println("서버로부터 메시지를 수신했습니다: " + receivedMessage);
+
+//            inputStream.close();
+//            outputStream.close();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
 
     }
 //
@@ -466,8 +514,8 @@ public class LayOut extends JFrame implements LayOutData{
                             Integer.toString(consumer.getMoney(j).getCount())+(consumer.getMoney(j).getMoney()==1000?"장":"개") +"</body></HTML>");
                     drinkbutton[j].setEnabled(false);
                     drinkbutton[j].setBackground(Color.black);
-                    Drink_price[j].setText(Integer.toString(machine.getDrinks(j).getPrice())+"원");
-                    drink_name[j].setText(machine.getDrinks(j).getName());
+                    Drink_price[j].setText(Integer.toString(drinkPrice[j])+"원");
+                    drink_name[j].setText(drinkName[j]);
                     if(machine.getStock(j)>0) drinkbutton[j].setText("");
                 }
                 if(machine.getInput()==0) {							//만약 입력된 돈이 0원이라면
@@ -511,6 +559,28 @@ public class LayOut extends JFrame implements LayOutData{
 
                 returnbtn.setEnabled(false);		//반환버튼을 클릭하면 다시 클릭 불가
                 GetDrinkName.setText("");			//음료수 배출구의 텍스트 제거
+
+
+                for(int i=0; i<5; i++) {
+                    if(machine.getDrinks(i)!=null){
+                        drinkName[i] = machine.getDrinks(i).getName();
+                        drinkPrice[i] = machine.getDrinks(i).getPrice();
+
+
+                    }
+//                    drink_name[i].setText(drinkName[i]);
+//                    Drink_price[i].setText("<HTML>"+ Integer.toString(drinkPrice[i])+"원</HTML>" );
+
+
+
+
+                }
+                for(int i=0; i<5; i++) {
+                    drink_name[i].setText(drinkName[i]);
+                    Drink_price[i].setText("<HTML>"+ Integer.toString(drinkPrice[i])+"원</HTML>");
+
+                }
+
             }
 
         });
@@ -564,7 +634,7 @@ public class LayOut extends JFrame implements LayOutData{
 
             //입력한 돈으로 음료수를 구입할 수 있는지 확인
             for(int i=0; i<5; i++) {
-                if(machine.getInput() >= machine.getDrinks(i).getPrice()) {		//만약 현재 입력된 input이 음료수의 가격보다 높다면
+                if(machine.getInput() >= drinkPrice[i]) {		//만약 현재 입력된 input이 음료수의 가격보다 높다면
                     drinkbutton[i].setEnabled(true);					//음료수 구입 가능
                     drinkbutton[i].setBackground(Color.red);			//음료수 버튼이 빨간색
                 }

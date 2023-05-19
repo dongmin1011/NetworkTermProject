@@ -105,6 +105,9 @@ public class VendingMachine{
 ////        System.out.println("drinks = " + drinks.get(n).peek());
 //        return (int) drinks.get(n).peek();
 //    }
+    public void updateDrink(String name, int price , int n){
+        drinks.get(n).updateStack(new OtherDrink(name, price));
+    }
     public MoneyInF getMoney(int n) {		//자판기의 돈 클래스 반환
         return money.get(n);
     }

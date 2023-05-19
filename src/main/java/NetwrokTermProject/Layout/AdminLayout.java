@@ -38,6 +38,7 @@ public class AdminLayout  extends JFrame implements LayOutData{
     JButton changePWbtn = new JButton("비밀번호 변경");
     JButton AddMoney = new JButton("돈 추가");
     //관리자 창의 메인 정보를 출력하는 레이블과 버튼들 선언
+
     public AdminLayout() {
         adminframe.setTitle("관리자 모드");
         adminframe.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
@@ -73,13 +74,18 @@ public class AdminLayout  extends JFrame implements LayOutData{
         }
         adminPanel.add(Subject);
 
+//        for(int i=0; i<5; i++) {
+//            drinkName[i] = machine.getDrinks(i).getName();
+//            drinkPrice[i] = machine.getDrinks(i).getPrice();
+//
+//        }
         AdminGrid.setPreferredSize(new Dimension(540, 260));	//AdminGrid의 크기 고정
         for(int i=0; i<5; i++) {
             AdminMenu[i] = new JButton(MenuName[i]);			//관리자 메뉴버튼 추가
             AdminGrid.add(AdminMenu[i]);
-            Adminstock[i] = new JButton(machine.getDrinks(i).getName()+"재고 추가");		//재고 추가 버튼 추가
+            Adminstock[i] = new JButton(drinkName[i]+"재고 추가");		//재고 추가 버튼 추가
             AdminGrid.add(Adminstock[i]);
-            AdminAdditional[i] = new JButton(machine.getDrinks(i).getName()+" 이름, 가격변경");	//이름 가격변경 버튼 추가
+            AdminAdditional[i] = new JButton(drinkName[i]+" 이름, 가격변경");	//이름 가격변경 버튼 추가
             AdminGrid.add(AdminAdditional[i]);
         }
         for(int i=0; i<5; i++) {
@@ -162,7 +168,7 @@ public class AdminLayout  extends JFrame implements LayOutData{
             InfoText.setText("");
             dataClear();
             for(int i=0; i<5; i++) {		//info_label과 info_num의 데이터를 음료수와 개수를 출력할 수 있도록 설정
-                info_label[i].setText(machine.getDrinks(i).getName());
+                info_label[i].setText(drinkName[i]);
                 info_num[i].setText(Integer.toString(machine.getStock(i))+ "개");
 
             }
@@ -239,7 +245,7 @@ public class AdminLayout  extends JFrame implements LayOutData{
             else if(n==3) machine.inputDrinks(new HighQualityCoffee(), n);
             else if(n==4)machine.inputDrinks(new Soda(), n);
 //            String s = MachineInfo.getText();
-            String tempdrinkname = machine.getDrinks(n).getName();
+            String tempdrinkname = drinkName[n];
             tempdrinkname += " 품절\n";
 //            if(s.contains(tempdrinkname)) {				//만약 품절 표시가 있다면 음료수를 추가 했으므로 지워줌
 //                s = s.replace(tempdrinkname, "");
@@ -252,14 +258,14 @@ public class AdminLayout  extends JFrame implements LayOutData{
             Calendar today = Calendar.getInstance();
             file.ExhaustionFileWrite(today.get(Calendar.YEAR )+"년 "+getToday(today.get(Calendar.MONTH )+1)+"월 "+getToday(today.get(Calendar.DATE ))+"일 "
                     + getToday(today.get(Calendar.HOUR_OF_DAY ))+"시 "+getToday(today.get(Calendar.MINUTE ))+"분 " +
-                    machine.getDrinks(n).getName() +" 추가", true);		//음료수를 추가한 날짜를 파일에 저장
+                    drinkName[n] +" 추가", true);		//음료수를 추가한 날짜를 파일에 저장
 
         }
 
         else InfoText.setText("10개 이상 보충 불가");		//만약 음료의 개수가 10개 이상 증가하면 보충 불가
 
         for(int i=0; i<5; i++) {							//음료수의 재고 변화를 업데이트
-            info_label[i].setText(machine.getDrinks(i).getName());
+            info_label[i].setText(drinkName[i]);
             info_num[i].setText(Integer.toString(machine.getStock(i))+ "개");
         }
 
@@ -270,9 +276,9 @@ public class AdminLayout  extends JFrame implements LayOutData{
         dataClear();
         JFrame changeframe = new JFrame();					//새로운 프레임 생성
         changeframe.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        changeframe.setTitle(machine.getDrinks(n).getName()+" 이름, 가격 변경");	//프레임 타이틀 설정
+        changeframe.setTitle(drinkName[n]+" 이름, 가격 변경");	//프레임 타이틀 설정
 
-        JLabel subjectText = new JLabel(machine.getDrinks(n).getName()+"의 이름, 가격을 변경합니다.");
+        JLabel subjectText = new JLabel(drinkName[n]+"의 이름, 가격을 변경합니다.");
         subjectText.setHorizontalAlignment(JLabel.CENTER);
         subjectText.setFont((new Font("맑은 고딕", Font.BOLD, 20)));
 
@@ -315,18 +321,27 @@ public class AdminLayout  extends JFrame implements LayOutData{
             if(count==0) {			//문자열에 숫자가 없다면 변경
                 if(s.length()>0) {
                     String str = MachineInfo.getText();
-                    str = str.replace(machine.getDrinks(n).getName(), inputfield[0].getText());	//만약 이미 음료수가 품절되어 있다면 이름을 바꿈
+                    str = str.replace(drinkName[n], inputfield[0].getText());	//만약 이미 음료수가 품절되어 있다면 이름을 바꿈
                     MachineInfo.setText(str);
 
-                    machine.getDrinks(n).setName(s);	//음료수의 이름 변경
+//                    machine.getDrinks(n).setName(s);
 
-                    Adminstock[n].setText(machine.getDrinks(n).getName()+"재고 추가");			//재고 추가와 이름,가격변경의 버튼도 변경
-                    AdminAdditional[n].setText(machine.getDrinks(n).getName()+  "이름, 가격변경");
+                    Adminstock[n].setText(drinkName[n]+"재고 추가");			//재고 추가와 이름,가격변경의 버튼도 변경
+                    AdminAdditional[n].setText(drinkName[n]+  "이름, 가격변경");
 
 
                     Textlabel.setText("이름 변경완료!");
                     inputfield[0].setText("");
-//                    drink_name[n].setText(machine.getDrinks(n).getName());		//자판기 화면에서 음료수 이름도 변경
+
+//                    machine.updateDrink(s, machine.getDrinks(n).getPrice(), n);//음료수의 이름 변경
+                    machine.updateDrink(s, drinkPrice[n], n);
+//                    for(int i=0; i<3;i++){
+//                        System.out.println("machine = " + machine.SellDrink(n).getName());
+//                    }
+                    drinkName[n] = s;
+
+                    Adminstock[n].setText(drinkName[n]+"재고 추가");
+                    AdminAdditional[n].setText(drinkName[n]+" 이름, 가격변경");		//자판기 화면에서 음료수 이름도 변경
                 }
                 else {
                     Textlabel.setText("정확히 입력하세요");
@@ -349,11 +364,16 @@ public class AdminLayout  extends JFrame implements LayOutData{
                         price = price - price%10;		//10원까지 입력받도록 조정
                         Textlabel.setText("<HTML>10원자리까지 입력 가능합니다.<br>");
                     }
-                    machine.getDrinks(n).setPrice( price );		//음료수의 가격 변경
-//                    Drink_price[n].setText("<HTML>"+ Integer.toString(machine.getDrinks(n).getPrice())+"원</HTML>" );	//음료수 가격 변경
+//                    machine.getDrinks(n).setPrice( price );
+//                    Drink_price[n].setText("<HTML>"+ Integer.toString(drinkPrice[n])+"원</HTML>" );	//음료수 가격 변경
                     inputfield[1].setText("");
 
                     Textlabel.setText( Textlabel.getText() + "가격 변경완료!");
+
+//                    machine.updateDrink(s, , n); //음료수의 가격 변경
+                    machine.updateDrink(drinkName[n], price, n);
+                    drinkPrice[n] = price;
+
                 }
                 else {
                     Textlabel.setText("정확히 입력하세요"); //length가 0이면 변경 불가

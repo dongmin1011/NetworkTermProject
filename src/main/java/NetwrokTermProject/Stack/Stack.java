@@ -15,6 +15,7 @@ public class Stack<T> {
         items.add(item);
     }
 
+
     public T pop() {
         if (items.isEmpty()) {
             throw new NoSuchElementException("Stack is empty");
@@ -24,10 +25,16 @@ public class Stack<T> {
 
     public T peek() {
         if (items.isEmpty()) {
-            throw new NoSuchElementException("Stack is empty");
+            return null;
+//            throw new NoSuchElementException("Stack is empty");
         }
 
         return items.get(items.size() - 1);
+    }
+    public void updateStack(T item){
+        for(int i=0; i< items.size(); i++){
+            items.update(i, item);
+        }
     }
 
     public boolean isEmpty() {
