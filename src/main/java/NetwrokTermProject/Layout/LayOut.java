@@ -44,8 +44,9 @@ public class LayOut extends JFrame implements LayOutData{
     VendingMachine machine = VendingMachine.getInstance();
 //    String drinkName[] = new String[5];
 //    int drinkPrice[] = new int[5];
-    
 
+    String toServerMessageSell; // 물건을 살 때 서버에 보내는 데이터
+    String toServerMessageSold;
     JFrame f = new JFrame();
     User consumer = new User();
     JPanel Drink_Grid = new JPanel();			//음료수 이름, 가격, 버튼이 존재하는 3x5 그리드 패널
@@ -311,8 +312,10 @@ public class LayOut extends JFrame implements LayOutData{
 
 //                machine.getDrinks(n).Sub();			//자판기에 있는 음료수의 재고를 줄임
                 machine.SellDrink(n);
-                file.SaleFileWrite(today.get(Calendar.YEAR )+"년 "+getToday(today.get(Calendar.MONTH )+1)+"월 "+getToday(today.get(Calendar.DATE ))+"일 "+
-                        drinkName[n] +" "+ drinkPrice[n] + "원", true);	//음료수 구입 내역을 파일에 이어서 씀
+                toServerMessageSell = today.get(Calendar.YEAR )+"년 "+getToday(today.get(Calendar.MONTH )+1)+"월 "+getToday(today.get(Calendar.DATE ))+"일 "+
+                        drinkName[n] +" "+ drinkPrice[n] + "원";
+                file.SaleFileWrite(toServerMessageSell, true);	//음료수 구입 내역을 파일에 이어서 씀
+                toServerMessageSell = 'A' + " " + toServerMessageSell;
 
 
                 machine.SubInput(drinkPrice[n]);		//자판기에 입력되어있는 돈에서 음료수의 가격을 뱀
@@ -349,8 +352,10 @@ public class LayOut extends JFrame implements LayOutData{
 //                    + getToday(today.get(Calendar.HOUR_OF_DAY ))+"시 "+
 //                    getToday(today.get(Calendar.MINUTE ))+"분 "+ today.get(Calendar.SECOND )+"초 "+
 //                    drinkName[n]() +" 품절", true);	//파일에 품절 표시
-
-            //MachineInfo(음료수 정보)에 품절된 음료수 표시
+            toServerMessageSold = today.get(Calendar.YEAR )+"년 "+getToday(today.get(Calendar.MONTH )+1)+"월 "+getToday(today.get(Calendar.DATE ))+"일 "+
+                    drinkName[n] +" 품절";  // 품절된 음료수 확인 문자열 담기
+            file.SoldOutWrite(toServerMessageSold, true); // 품절 정보 파일에 담기
+            toServerMessageSold = 'B' + " " + toServerMessageSold;
             MachineInfo.append(drinkName[n]+ " 품절\n");
         }
 
@@ -375,9 +380,15 @@ public class LayOut extends JFrame implements LayOutData{
             InputStream inputStream = socket.getInputStream();
             OutputStream outputStream = socket.getOutputStream();
 //            BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
-            byte[] messageBytes = drinkName[n].getBytes();
+            byte[] messageBytes= toServerMessageSell.getBytes();
             outputStream.write(messageBytes);
             outputStream.flush();
+            if(!toServerMessageSold.isEmpty()) {
+                messageBytes = toServerMessageSold.getBytes();
+                outputStream.write(messageBytes);
+                outputStream.flush();
+                toServerMessageSold = "";
+            }
             System.out.println("서버로 메시지를 전송했습니다.");
 
             // 서버로부터 데이터 수신

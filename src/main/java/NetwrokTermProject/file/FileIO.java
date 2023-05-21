@@ -204,7 +204,7 @@ public class FileIO {
         return true;						//리스트에 문자열이 존재하지 않으면 true리턴
     }
 
-    void ExhaustionFileRead() {				//exhaustion텍스트 파일을 읽어옴
+    void ExhaustionFileRead() {				//exhaustion 텍스트 파일을 읽어옴
 
         exhaustionframe.add(readpanel);
         try {
@@ -250,7 +250,7 @@ public class FileIO {
 
         }
     }
-    public void ExhaustionFileWrite(String str, boolean write) {		//exhaustion텍스트 파일에 추가 write가 false면 덮어쓰고 true면 이어씀
+    public void ExhaustionFileWrite(String str, boolean write) {		//exhaustion 텍스트 파일에 추가 write가 false면 덮어쓰고 true면 이어씀
 
         try {
             file = new File("Exhaustion.txt");
@@ -272,5 +272,22 @@ public class FileIO {
         }
     }
 
+    public void SoldOutWrite(String str, boolean write) { 	//soldout 텍스트 파일에 글을 씀 false가 입력되면 처음부터 다시 입력받고 true가 입력되면 뒤에 이어서 씀
+        try {
+            file = new File("Soldout.txt");					//sale.txt파일 오픈
+            bw = new BufferedWriter(new FileWriter(file, write));	//bufferedWriter를 이용하면 빠른 입출력이 가능하다.
+
+            if(file.isFile() && file.canWrite()) {		//파일이 존재하고 쓸 수 있다면
+
+                bw.write(str);							//입력받은 str문자열을 파일에 추가
+                if(!str.equals(""))	bw.newLine();
+
+                bw.flush();								//남아있는 데이터를 모두 출력
+                bw.close();								//스트림을 닫음
+            }
+        } catch (IOException e) {
+            //	e.printStackTrace();
+        }
+    }
 
 }
