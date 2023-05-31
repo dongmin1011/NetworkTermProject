@@ -383,7 +383,7 @@ public class LayOut extends JFrame implements LayOutData{
             byte[] messageBytes= toServerMessageSell.getBytes();
             outputStream.write(messageBytes);
             outputStream.flush();
-            if(!toServerMessageSold.isEmpty()) {
+            if(toServerMessageSold != null && !toServerMessageSold.isEmpty()) {
                 messageBytes = toServerMessageSold.getBytes();
                 outputStream.write(messageBytes);
                 outputStream.flush();
