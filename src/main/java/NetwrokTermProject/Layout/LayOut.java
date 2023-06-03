@@ -82,9 +82,10 @@ public class LayOut extends JFrame implements LayOutData{
 
     String serverIP = "localhost";
     int serverPort = 12345;
+    Socket socket;
 
     //자판기 화면의 레이아웃 생성
-    public LayOut(){
+    public LayOut() throws IOException, ClassNotFoundException {
         f.setResizable(false);		//f프레임의 크기 변경 불가
         f.setPreferredSize(new Dimension(560, 720));
         int [] moneysize = {1000, 500, 100, 50, 10};
@@ -230,6 +231,24 @@ public class LayOut extends JFrame implements LayOutData{
         //만약 f프레임이 닫히면 열려있는 모든 프레임을 닫음
         f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
+
+        socket = new Socket(serverIP, serverPort);
+        OutputStream outputStream = socket.getOutputStream();
+
+        String drinkList = "";
+        for(int i=0; i<5; i++){
+            drinkList += machine.getDrinks(i).getName() + " ";
+            drinkList += machine.getDrinks(i).getPrice() + " ";
+            drinkList += machine.getDrinks(i).getStock() + " ";
+        }
+
+
+        byte[] messageBytes= drinkList.getBytes();
+        outputStream.write(messageBytes);
+
+//        outputStream.close();
+
+
     }
     public void Buttonfunc(){
         adminButton.addActionListener(new ActionListener(){			//관리자 버튼 입력시 동작
@@ -255,36 +274,31 @@ public class LayOut extends JFrame implements LayOutData{
             }
         });
 
-        try {
-            Socket socket = new Socket(serverIP, serverPort);
+
             //Drink_data는 음료수 버튼을 클릭시 일어나는 동작을 정의
-            Drink_data(socket);
+            Drink_data();
 //        //ReturnButton은 반환 버튼 클릭시 동작 정의
             ReturnButton();
             //Consumer_data는 사용자에 대한 정보와 돈 입력 정의
             Consumer_data();
 
 
-        } catch (UnknownHostException e) {
-            throw new RuntimeException(e);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+
 
 
     }
-    void Drink_data(Socket socket) {
+    void Drink_data() {
         //음료수 버튼이 눌렸을 때의 동작 정의
-        drinkbutton[0].addActionListener(e->OrderDrink(0,socket));
-        drinkbutton[1].addActionListener(e->OrderDrink(1, socket));
-        drinkbutton[2].addActionListener(e->OrderDrink(2, socket));
-        drinkbutton[3].addActionListener(e->OrderDrink(3,socket));
-        drinkbutton[4].addActionListener(e->OrderDrink(4,socket));
+        drinkbutton[0].addActionListener(e->OrderDrink(0));
+        drinkbutton[1].addActionListener(e->OrderDrink(1));
+        drinkbutton[2].addActionListener(e->OrderDrink(2));
+        drinkbutton[3].addActionListener(e->OrderDrink(3));
+        drinkbutton[4].addActionListener(e->OrderDrink(4));
 
     }
 //
     //음료수 버튼을 눌렀을 때(매개변수는 음료의 위치)
-    void OrderDrink(int n, Socket socket) {
+    void OrderDrink(int n) {
         int count = 0;
         int []moneysize = {1000,500,100,50,10};
         for(int i=0; i<inputmoneylist.size(); ) {
