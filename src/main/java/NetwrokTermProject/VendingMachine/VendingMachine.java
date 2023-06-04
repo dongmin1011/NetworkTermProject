@@ -14,6 +14,8 @@ public class VendingMachine{
 //    private MoneyInF[] money;		//자판기 잔돈 배열 객체
     private Integer input;		//돈 입력
 
+    private Integer UniqueNumber = 1;
+
     private LinkedList<MoneyInF> money;     //돈 링크드리스트 객체
 
     private LinkedList<Stack> drinks;
@@ -76,6 +78,10 @@ public class VendingMachine{
 //        }
     }
 
+    public Integer getUniqueNumber()
+    {
+        return UniqueNumber;
+    }
 
     public Admin getAdmin() {
         return admin;			//자판기의 admin객체 리턴

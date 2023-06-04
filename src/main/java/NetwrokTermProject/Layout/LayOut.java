@@ -282,6 +282,20 @@ public class LayOut extends JFrame implements LayOutData{
             //Consumer_data는 사용자에 대한 정보와 돈 입력 정의
             Consumer_data();
 
+            InputStream inputStream = socket.getInputStream();
+            OutputStream outputStream = socket.getOutputStream();
+            String SendUniqueNum = "A " + machine.getUniqueNumber();
+            byte[] messageBytes= SendUniqueNum.getBytes();
+            outputStream.write(messageBytes);
+            outputStream.flush();
+
+            System.out.println("서버로 고유번호를 전송했습니다.");
+
+            // 서버로부터 데이터 수신
+            byte[] buffer = new byte[1024];
+            int bytesRead = inputStream.read(buffer);
+            String receivedMessage = new String(buffer, 0, bytesRead);
+            System.out.println("서버로부터 메시지를 수신받았습니다: " + receivedMessage);
 
 
 
@@ -326,10 +340,10 @@ public class LayOut extends JFrame implements LayOutData{
 
 //                machine.getDrinks(n).Sub();			//자판기에 있는 음료수의 재고를 줄임
                 machine.SellDrink(n);
-                toServerMessageSell = today.get(Calendar.YEAR )+"년 "+getToday(today.get(Calendar.MONTH )+1)+"월 "+getToday(today.get(Calendar.DATE ))+"일 "+
+                toServerMessageSell = machine.getUniqueNumber() + " " + today.get(Calendar.YEAR )+"년 "+getToday(today.get(Calendar.MONTH )+1)+"월 "+getToday(today.get(Calendar.DATE ))+"일 "+
                         drinkName[n] +" "+ drinkPrice[n] + "원";
                 file.SaleFileWrite(toServerMessageSell, true);	//음료수 구입 내역을 파일에 이어서 씀
-                toServerMessageSell = 'A' + " " + toServerMessageSell;
+                toServerMessageSell = 'B' + " " + toServerMessageSell;
 
 
                 machine.SubInput(drinkPrice[n]);		//자판기에 입력되어있는 돈에서 음료수의 가격을 뱀
@@ -366,10 +380,10 @@ public class LayOut extends JFrame implements LayOutData{
 //                    + getToday(today.get(Calendar.HOUR_OF_DAY ))+"시 "+
 //                    getToday(today.get(Calendar.MINUTE ))+"분 "+ today.get(Calendar.SECOND )+"초 "+
 //                    drinkName[n]() +" 품절", true);	//파일에 품절 표시
-            toServerMessageSold = today.get(Calendar.YEAR )+"년 "+getToday(today.get(Calendar.MONTH )+1)+"월 "+getToday(today.get(Calendar.DATE ))+"일 "+
+            toServerMessageSold = machine.getUniqueNumber() + " " + today.get(Calendar.YEAR )+"년 "+getToday(today.get(Calendar.MONTH )+1)+"월 "+getToday(today.get(Calendar.DATE ))+"일 "+
                     drinkName[n] +" 품절";  // 품절된 음료수 확인 문자열 담기
             file.SoldOutWrite(toServerMessageSold, true); // 품절 정보 파일에 담기
-            toServerMessageSold = 'B' + " " + toServerMessageSold;
+            toServerMessageSold = 'C' + " " + toServerMessageSold;
             MachineInfo.append(drinkName[n]+ " 품절\n");
         }
 
