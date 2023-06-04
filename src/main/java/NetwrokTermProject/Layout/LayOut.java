@@ -222,20 +222,11 @@ public class LayOut extends JFrame implements LayOutData{
         using.add(scrollPane2);		//using패널에 뽑은 음료수 목록 추가
         f.add(using, BorderLayout.SOUTH);
 
-        Buttonfunc();	//버튼 모음
-
-
-        //f프레임의 사이즈 지정
-        f.setSize(560,720);
-        f.setVisible(true);
-        //만약 f프레임이 닫히면 열려있는 모든 프레임을 닫음
-        f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-
 
         socket = new Socket(serverIP, serverPort);
         OutputStream outputStream = socket.getOutputStream();
 
-        String drinkList = "";
+        String drinkList = machine.getUniqueNumber().toString();
         for(int i=0; i<5; i++){
             drinkList += machine.getDrinks(i).getName() + " ";
             drinkList += machine.getDrinks(i).getPrice() + " ";
@@ -246,11 +237,23 @@ public class LayOut extends JFrame implements LayOutData{
         byte[] messageBytes= drinkList.getBytes();
         outputStream.write(messageBytes);
 
+        Buttonfunc();	//버튼 모음
+
+
+        //f프레임의 사이즈 지정
+        f.setSize(560,720);
+        f.setVisible(true);
+        //만약 f프레임이 닫히면 열려있는 모든 프레임을 닫음
+        f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
+
+
+
 //        outputStream.close();
 
 
     }
-    public void Buttonfunc(){
+    public void Buttonfunc() throws IOException {
         adminButton.addActionListener(new ActionListener(){			//관리자 버튼 입력시 동작
             @Override
             public void actionPerformed(ActionEvent e) {
