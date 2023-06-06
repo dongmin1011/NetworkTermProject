@@ -12,7 +12,11 @@ import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.GridLayout;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.Calendar;
+import java.net.Socket;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -270,36 +274,36 @@ public class AdminLayout  extends JFrame implements LayOutData{
         }
 
     }
-    void changeDrink(int n) {				//음료수의 이름과 가격 변경
-
+    void changeDrink(int n) {                //음료수의 이름과 가격 변경
+if(ConfigureArray()) {
         InfoText.setText("");
         dataClear();
-        JFrame changeframe = new JFrame();					//새로운 프레임 생성
+        JFrame changeframe = new JFrame();                    //새로운 프레임 생성
         changeframe.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        changeframe.setTitle(drinkName[n]+" 이름, 가격 변경");	//프레임 타이틀 설정
+        changeframe.setTitle(drinkName[n] + " 이름, 가격 변경");    //프레임 타이틀 설정
 
-        JLabel subjectText = new JLabel(drinkName[n]+"의 이름, 가격을 변경합니다.");
+        JLabel subjectText = new JLabel(drinkName[n] + "의 이름, 가격을 변경합니다.");
         subjectText.setHorizontalAlignment(JLabel.CENTER);
         subjectText.setFont((new Font("맑은 고딕", Font.BOLD, 20)));
 
         JPanel changeData = new JPanel();
         JPanel changePanel = new JPanel();
-        JLabel [] input = new JLabel[2];
-        JTextField [] inputfield = new JTextField[2];
-        JButton [] inputbtn = new JButton[2];
+        JLabel[] input = new JLabel[2];
+        JTextField[] inputfield = new JTextField[2];
+        JButton[] inputbtn = new JButton[2];
 
-        changePanel.setLayout(new GridLayout(2, 3, 0, 10));		//이름과 가격을 입력받을 패널을 2x3으로 생성
-        changePanel.setPreferredSize(new Dimension(350, 70));	//changepanel의 사이즈를 지정
-        String [] tempinput = {"이름 입력", "가격 입력(원없이)"};
+        changePanel.setLayout(new GridLayout(2, 3, 0, 10));        //이름과 가격을 입력받을 패널을 2x3으로 생성
+        changePanel.setPreferredSize(new Dimension(350, 70));    //changepanel의 사이즈를 지정
+        String[] tempinput = {"이름 입력", "가격 입력(원없이)"};
         String tempbtn = "변경";
 
-        for(int i=0; i<2; i++) {
+        for (int i = 0; i < 2; i++) {
             input[i] = new JLabel(tempinput[i]);
             input[i].setHorizontalAlignment(JLabel.CENTER);
             inputfield[i] = new JTextField();
             inputbtn[i] = new JButton(tempbtn);
 
-            changePanel.add(input[i]);				//생성한 레이블과 필드, 패널을 차례대로 changepanel에 삽입
+            changePanel.add(input[i]);                //생성한 레이블과 필드, 패널을 차례대로 changepanel에 삽입
             changePanel.add(inputfield[i]);
             changePanel.add(inputbtn[i]);
         }
@@ -309,25 +313,25 @@ public class AdminLayout  extends JFrame implements LayOutData{
         Textlabel.setFont(new Font("맑은 고딕", Font.BOLD, 20));
 
 
-        inputbtn[0].addActionListener(e->{			//이름 변경 버튼을 눌렀을 때
+        inputbtn[0].addActionListener(e -> {            //이름 변경 버튼을 눌렀을 때
             String s = inputfield[0].getText();
 
-            int count=0;
-            for(int i=0; i<s.length(); i++) {
-                if(s.charAt(i)>='0' && s.charAt(i)<='9') {
-                    count++;			//만약 문자열에 숫자가 존재한다면 count증가
+            int count = 0;
+            for (int i = 0; i < s.length(); i++) {
+                if (s.charAt(i) >= '0' && s.charAt(i) <= '9') {
+                    count++;            //만약 문자열에 숫자가 존재한다면 count증가
                 }
             }
-            if(count==0) {			//문자열에 숫자가 없다면 변경
-                if(s.length()>0) {
+            if (count == 0) {            //문자열에 숫자가 없다면 변경
+                if (s.length() > 0) {
                     String str = MachineInfo.getText();
-                    str = str.replace(drinkName[n], inputfield[0].getText());	//만약 이미 음료수가 품절되어 있다면 이름을 바꿈
+                    str = str.replace(drinkName[n], inputfield[0].getText());    //만약 이미 음료수가 품절되어 있다면 이름을 바꿈
                     MachineInfo.setText(str);
 
 //                    machine.getDrinks(n).setName(s);
 
-                    Adminstock[n].setText(drinkName[n]+"재고 추가");			//재고 추가와 이름,가격변경의 버튼도 변경
-                    AdminAdditional[n].setText(drinkName[n]+  "이름, 가격변경");
+                    Adminstock[n].setText(drinkName[n] + "재고 추가");            //재고 추가와 이름,가격변경의 버튼도 변경
+                    AdminAdditional[n].setText(drinkName[n] + "이름, 가격변경");
 
 
                     Textlabel.setText("이름 변경완료!");
@@ -340,61 +344,59 @@ public class AdminLayout  extends JFrame implements LayOutData{
 //                    }
                     drinkName[n] = s;
 
-                    Adminstock[n].setText(drinkName[n]+"재고 추가");
-                    AdminAdditional[n].setText(drinkName[n]+" 이름, 가격변경");		//자판기 화면에서 음료수 이름도 변경
-                }
-                else {
+                    Adminstock[n].setText(drinkName[n] + "재고 추가");
+                    AdminAdditional[n].setText(drinkName[n] + " 이름, 가격변경");        //자판기 화면에서 음료수 이름도 변경
+                } else {
                     Textlabel.setText("정확히 입력하세요");
                     inputfield[0].setText("");
                 }
-            }
-            else {		//문자열에 숫자가 존재한다면 이름 변경 불가
+            } else {        //문자열에 숫자가 존재한다면 이름 변경 불가
                 Textlabel.setText("이름에 숫자가 들어갈 수 없습니다");
                 inputfield[0].setText("");
             }
         });
 
-        inputbtn[1].addActionListener(e->{			//가격 변경 버튼을 눌렀을 때 동작
+        inputbtn[1].addActionListener(e -> {            //가격 변경 버튼을 눌렀을 때 동작
             try {
                 Textlabel.setText("");
-                String s = inputfield[1].getText();	//inputfiled를 s에 저장
-                if(s.length()>0) {
-                    int price = Integer.parseInt(s);	//s문자열을 숫자로 변환
-                    if(price%10!=0) {				//만약 price에 1원이 존재한다면
-                        price = price - price%10;		//10원까지 입력받도록 조정
+                String s = inputfield[1].getText();    //inputfiled를 s에 저장
+                if (s.length() > 0) {
+                    int price = Integer.parseInt(s);    //s문자열을 숫자로 변환
+                    if (price % 10 != 0) {                //만약 price에 1원이 존재한다면
+                        price = price - price % 10;        //10원까지 입력받도록 조정
                         Textlabel.setText("<HTML>10원자리까지 입력 가능합니다.<br>");
                     }
 //                    machine.getDrinks(n).setPrice( price );
 //                    Drink_price[n].setText("<HTML>"+ Integer.toString(drinkPrice[n])+"원</HTML>" );	//음료수 가격 변경
                     inputfield[1].setText("");
 
-                    Textlabel.setText( Textlabel.getText() + "가격 변경완료!");
+                    Textlabel.setText(Textlabel.getText() + "가격 변경완료!");
 
 //                    machine.updateDrink(s, , n); //음료수의 가격 변경
                     machine.updateDrink(drinkName[n], price, n);
                     drinkPrice[n] = price;
 
-                }
-                else {
+                } else {
                     Textlabel.setText("정확히 입력하세요"); //length가 0이면 변경 불가
                     inputfield[1].setText("");
                 }
-            }
-            catch(NumberFormatException e1) {		//만약 문자가 입력되었다면 숫자로 변경 불가
+            } catch (NumberFormatException e1) {        //만약 문자가 입력되었다면 숫자로 변경 불가
                 inputfield[1].setText("");
                 Textlabel.setText("숫자만 입력하세요!");
             }
 
         });
 
-        changeData.add(changePanel);		//changeData패널에 changepanel삽입
-        changeData.add(Textlabel);			//textlabel삽입
+        changeData.add(changePanel);        //changeData패널에 changepanel삽입
+        changeData.add(Textlabel);            //textlabel삽입
 
         changeframe.add(subjectText, "North");
         changeframe.add(changeData);
         changeframe.setResizable(false);
-        changeframe.setSize(400,200);
+        changeframe.setSize(400, 200);
         changeframe.setVisible(true);
+    }
+else{}
     }
     void collectmoney(int n) {			//수금하기 버튼 클릭 시 동작
         InfoText.setText("");
@@ -588,5 +590,49 @@ public class AdminLayout  extends JFrame implements LayOutData{
         }
     }
 
+    boolean ConfigureArray()
+    {
+        String drinkList = "D " + machine.getUniqueNumber().toString() + " ";
+        for(int i=0; i<5; i++){
+            if(machine.getDrinks(i) != null) {
+                drinkList += machine.getDrinks(i).getName() + " ";
+                drinkList += machine.getDrinks(i).getPrice() + " ";
+                drinkList += machine.getStock(i) + " ";
+            }
+            else
+            {
+                drinkList += machine.ifNullGetName(i) + " ";
+                drinkList += machine.ifNullGetPrice(i) + " ";
+                drinkList += machine.getStock(i) + " ";
+            }
+        }
+
+        System.out.println("현황 : " + drinkList);
+
+        try {
+            InputStream inputStream =  machine.socket.getInputStream();
+            OutputStream outputStream =  machine.socket.getOutputStream();
+//            BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
+            byte[] messageBytes= drinkList.getBytes();
+            outputStream.write(messageBytes);
+            outputStream.flush();
+            System.out.println("서버로 메시지를 전송했습니다.");
+
+            // 서버로부터 데이터 수신
+            byte[] buffer = new byte[1024];
+            int bytesRead = inputStream.read(buffer);
+            String receivedMessage = new String(buffer, 0, bytesRead);
+            System.out.println("서버로부터 메시지를 수신했습니다: " + receivedMessage);
+
+            if(receivedMessage.equals("Yes"))
+                return true;
+            else
+                return false;
+            //            inputStream.close();
+            //            outputStream.close();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }
 

@@ -82,7 +82,6 @@ public class LayOut extends JFrame implements LayOutData{
 
     String serverIP = "localhost";
     int serverPort = 12345;
-    Socket socket;
 
     //자판기 화면의 레이아웃 생성
     public LayOut() throws IOException, ClassNotFoundException {
@@ -98,7 +97,6 @@ public class LayOut extends JFrame implements LayOutData{
         for(int i=0; i<5; i++) {
             drinkName[i] = machine.getDrinks(i).getName();
             drinkPrice[i] = machine.getDrinks(i).getPrice();
-            
         }
         //음료수 이름과 가격, 버튼을 생성하고 Drink_grid에 삽입
         for(int i=0; i<5; i++) {
@@ -223,8 +221,8 @@ public class LayOut extends JFrame implements LayOutData{
         f.add(using, BorderLayout.SOUTH);
 
 
-        socket = new Socket(serverIP, serverPort);
-        OutputStream outputStream = socket.getOutputStream();
+        machine.socket = new Socket(serverIP, serverPort);
+        OutputStream outputStream = machine.socket.getOutputStream();
 
         String drinkList = machine.getUniqueNumber().toString();
         for(int i=0; i<5; i++){
@@ -233,7 +231,7 @@ public class LayOut extends JFrame implements LayOutData{
             drinkList += machine.getDrinks(i).getStock() + " ";
         }
 
-
+        System.out.println(drinkList);
         byte[] messageBytes= drinkList.getBytes();
         outputStream.write(messageBytes);
 
@@ -247,11 +245,7 @@ public class LayOut extends JFrame implements LayOutData{
         f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
 
-
-
 //        outputStream.close();
-
-
     }
     public void Buttonfunc() throws IOException {
         adminButton.addActionListener(new ActionListener(){			//관리자 버튼 입력시 동작
@@ -285,8 +279,8 @@ public class LayOut extends JFrame implements LayOutData{
             //Consumer_data는 사용자에 대한 정보와 돈 입력 정의
             Consumer_data();
 
-            InputStream inputStream = socket.getInputStream();
-            OutputStream outputStream = socket.getOutputStream();
+            InputStream inputStream =  machine.socket.getInputStream();
+            OutputStream outputStream =  machine.socket.getOutputStream();
             String SendUniqueNum = "A " + machine.getUniqueNumber();
             byte[] messageBytes= SendUniqueNum.getBytes();
             outputStream.write(messageBytes);
@@ -299,10 +293,6 @@ public class LayOut extends JFrame implements LayOutData{
             int bytesRead = inputStream.read(buffer);
             String receivedMessage = new String(buffer, 0, bytesRead);
             System.out.println("서버로부터 메시지를 수신받았습니다: " + receivedMessage);
-
-
-
-
     }
     void Drink_data() {
         //음료수 버튼이 눌렸을 때의 동작 정의
@@ -316,124 +306,132 @@ public class LayOut extends JFrame implements LayOutData{
 //
     //음료수 버튼을 눌렀을 때(매개변수는 음료의 위치)
     void OrderDrink(int n) {
-        int count = 0;
-        int []moneysize = {1000,500,100,50,10};
-        for(int i=0; i<inputmoneylist.size(); ) {
-            for(int j=0; j<5; j++) {
-                if(inputmoneylist.get(i).getMoney()==moneysize[j] ) {
-                    if(moneysize[j]!=1000) {
-                        machine.getMoney(j).Add();		//자판기가 가지고 있는 돈 증가
+        if(ConfigureArray()) {
+            System.out.println("비교 : 같음");
+            int count = 0;
+            int[] moneysize = {1000, 500, 100, 50, 10};
+            for (int i = 0; i < inputmoneylist.size(); ) {
+                for (int j = 0; j < 5; j++) {
+                    if (inputmoneylist.get(i).getMoney() == moneysize[j]) {
+                        if (moneysize[j] != 1000) {
+                            machine.getMoney(j).Add();        //자판기가 가지고 있는 돈 증가
+                        }
                     }
                 }
-            }
-            if(inputmoneylist.get(i).getMoney()!=1000) {
-                inputmoneylist.remove(i);		//자판기에 천원말고 다른 돈이 들어와있으면 inputlist에서 제거하고 자판기로 들어감
+                if (inputmoneylist.get(i).getMoney() != 1000) {
+                    inputmoneylist.remove(i);        //자판기에 천원말고 다른 돈이 들어와있으면 inputlist에서 제거하고 자판기로 들어감
 
+                } else {                //천원짜리가 자판기 안에 남아있는 경우를 셈
+                    count++;        //천원짜리의 개수 증가
+                    i++;
+                }
             }
-            else {				//천원짜리가 자판기 안에 남아있는 경우를 셈
-                count++;		//천원짜리의 개수 증가
-                i++;
-            }
-        }
 
-        Calendar today = Calendar.getInstance();
+            Calendar today = Calendar.getInstance();
 
-        if(drinkPrice[n]<=machine.getInput()) {	//자판기에 있는 돈보다 음료수의 가격이 쌀 경우(구입 가능)
-            if(machine.getStock(n)>0) {					//음료수의 재고가 남아있다면
+            if (drinkPrice[n] <= machine.getInput()) {    //자판기에 있는 돈보다 음료수의 가격이 쌀 경우(구입 가능)
+                if (machine.getStock(n) > 0) {                    //음료수의 재고가 남아있다면
 
 //                machine.getDrinks(n).Sub();			//자판기에 있는 음료수의 재고를 줄임
-                machine.SellDrink(n);
-                toServerMessageSell = machine.getUniqueNumber() + " " + today.get(Calendar.YEAR )+"년 "+getToday(today.get(Calendar.MONTH )+1)+"월 "+getToday(today.get(Calendar.DATE ))+"일 "+
-                        drinkName[n] +" "+ drinkPrice[n] + "원";
-                file.SaleFileWrite(toServerMessageSell, true);	//음료수 구입 내역을 파일에 이어서 씀
-                toServerMessageSell = 'B' + " " + toServerMessageSell;
+                    machine.SellDrink(n);
+                    toServerMessageSell = machine.getUniqueNumber() + " " + today.get(Calendar.YEAR) + "년 " + getToday(today.get(Calendar.MONTH) + 1) + "월 " + getToday(today.get(Calendar.DATE)) + "일 " +
+                            drinkName[n] + " " + drinkPrice[n] + "원";
+                    file.SaleFileWrite(toServerMessageSell, true);    //음료수 구입 내역을 파일에 이어서 씀
+                    toServerMessageSell = 'B' + " " + toServerMessageSell;
 
 
-                machine.SubInput(drinkPrice[n]);		//자판기에 입력되어있는 돈에서 음료수의 가격을 뱀
-                inputMoney.setText(Integer.toString(machine.getInput()));	//자판기에 입력되어 있는 돈을 inputMoney 필드에 업데이트
+                    machine.SubInput(drinkPrice[n]);        //자판기에 입력되어있는 돈에서 음료수의 가격을 뱀
+                    inputMoney.setText(Integer.toString(machine.getInput()));    //자판기에 입력되어 있는 돈을 inputMoney 필드에 업데이트
 
-                if(machine.getInput()-count*1000 < 0) {			//만약 자판기가 아직 사용하지 않은 1000원을 사용해야 한다면
-                    count--;						//저장되어있는 천원의 개수를 줄임
-                    machine.getMoney(0).Add();		//자판기의 천원짜리 증가
-                    inputmoneylist.remove(0);		//inputlist에 남아있는 천원 제거
+                    if (machine.getInput() - count * 1000 < 0) {            //만약 자판기가 아직 사용하지 않은 1000원을 사용해야 한다면
+                        count--;                        //저장되어있는 천원의 개수를 줄임
+                        machine.getMoney(0).Add();        //자판기의 천원짜리 증가
+                        inputmoneylist.remove(0);        //inputlist에 남아있는 천원 제거
+                    }
+                    GetDrinkName.setText(drinkName[n]);        //음료수 반환구에 뽑은 음료수 출력
+                    usersdrink.append(drinkName[n] + '\n');        //사용자가 뽑은 음료수 추가
+                } else {                                                //음료수의 재고가 없다면
+                    drinkbutton[n].setEnabled(false);                //음료수버튼을 클릭불가
+                    drinkbutton[n].setBackground(Color.black);
                 }
-                GetDrinkName.setText(drinkName[n]);		//음료수 반환구에 뽑은 음료수 출력
-                usersdrink.append(drinkName[n]+'\n');		//사용자가 뽑은 음료수 추가
             }
-            else {												//음료수의 재고가 없다면
-                drinkbutton[n].setEnabled(false);				//음료수버튼을 클릭불가
+            for (int i = 0; i < 5; i++) {
+                if (drinkPrice[i] > machine.getInput()) {
+                    drinkbutton[i].setEnabled(false);            //음료수의 가격이 더 비싸다면 음료수 버튼은 클릭 불가하고 검은색으로 바뀜
+                    drinkbutton[i].setBackground(Color.black);
+                }
+            }
+
+            if (machine.getStock(n) == 0) {        //만약 음료수의 개수가 0개라면
+                drinkbutton[n].setEnabled(false);            //음료수 클릭 불가
+                drinkbutton[n].setText("품");                //음료수 버튼에 품절 표시
                 drinkbutton[n].setBackground(Color.black);
-            }
-        }
-        for(int i=0; i<5; i++) {
-            if(drinkPrice[i] >machine.getInput()) {
-                drinkbutton[i].setEnabled(false);			//음료수의 가격이 더 비싸다면 음료수 버튼은 클릭 불가하고 검은색으로 바뀜
-                drinkbutton[i].setBackground(Color.black);
-            }
-        }
 
-        if(machine.getStock(n)==0) {		//만약 음료수의 개수가 0개라면
-            drinkbutton[n].setEnabled(false);			//음료수 클릭 불가
-            drinkbutton[n].setText("품");				//음료수 버튼에 품절 표시
-            drinkbutton[n].setBackground(Color.black);
-
-            //파일에 음료수가 소진된 날을 씀
+                //파일에 음료수가 소진된 날을 씀
 //            file.ExhaustionFileWrite(today.get(Calendar.YEAR )+"년 "+getToday(today.get(Calendar.MONTH )+1)+
 //                    "월 "+getToday(today.get(Calendar.DATE ))+"일 "
 //                    + getToday(today.get(Calendar.HOUR_OF_DAY ))+"시 "+
 //                    getToday(today.get(Calendar.MINUTE ))+"분 "+ today.get(Calendar.SECOND )+"초 "+
 //                    drinkName[n]() +" 품절", true);	//파일에 품절 표시
-            toServerMessageSold = machine.getUniqueNumber() + " " + today.get(Calendar.YEAR )+"년 "+getToday(today.get(Calendar.MONTH )+1)+"월 "+getToday(today.get(Calendar.DATE ))+"일 "+
-                    drinkName[n] +" 품절";  // 품절된 음료수 확인 문자열 담기
-            file.SoldOutWrite(toServerMessageSold, true); // 품절 정보 파일에 담기
-            toServerMessageSold = 'C' + " " + toServerMessageSold;
-            MachineInfo.append(drinkName[n]+ " 품절\n");
-        }
+                toServerMessageSold = machine.getUniqueNumber() + " " + today.get(Calendar.YEAR) + "년 " + getToday(today.get(Calendar.MONTH) + 1) + "월 " + getToday(today.get(Calendar.DATE)) + "일 " +
+                        drinkName[n] + " 품절";  // 품절된 음료수 확인 문자열 담기
+                file.SoldOutWrite(toServerMessageSold, true); // 품절 정보 파일에 담기
+                toServerMessageSold = 'C' + " " + toServerMessageSold;
+                MachineInfo.append(drinkName[n] + " 품절\n");
+            }
 
-        String s = MachineInfo.getText();		//MachineInfo에 출력된 출력문 제거
+            String s = MachineInfo.getText();        //MachineInfo에 출력된 출력문 제거
 
-        if(s.contains("5000원 이상 입력 불가")) {				//5000원 이상 입력 불가 출력문 제거
-            s= s.replace("5000원 이상 입력 불가\n", "");
-            MachineInfo.setText(s);
-        }
-        if(s.contains("천원지폐는 3장이상 불가")&& count<3) {		//1000원 3장 이상 입력 불가 출력문 제거(천원의 개수가 3개 이하일때만)
-            s= s.replace("천원지폐는 3장이상 불가\n", "");
-            MachineInfo.setText(s);
-        }
-        count = 0;
-        for(int i=0; i<5; i++) {						//모든 음료수가 하나도 없다면
-            if(machine.getStock(i)==0)count++;
-        }
-        if(count==5) {									//MachineInfo에 음료수가 없다고 출력
-            MachineInfo.append("음료수가 하나도 없습니다!\n");
-        }
-        try {
-            InputStream inputStream = socket.getInputStream();
-            OutputStream outputStream = socket.getOutputStream();
+            if (s.contains("5000원 이상 입력 불가")) {                //5000원 이상 입력 불가 출력문 제거
+                s = s.replace("5000원 이상 입력 불가\n", "");
+                MachineInfo.setText(s);
+            }
+            if (s.contains("천원지폐는 3장이상 불가") && count < 3) {        //1000원 3장 이상 입력 불가 출력문 제거(천원의 개수가 3개 이하일때만)
+                s = s.replace("천원지폐는 3장이상 불가\n", "");
+                MachineInfo.setText(s);
+            }
+            count = 0;
+            for (int i = 0; i < 5; i++) {                        //모든 음료수가 하나도 없다면
+                if (machine.getStock(i) == 0) count++;
+            }
+            if (count == 5) {                                    //MachineInfo에 음료수가 없다고 출력
+                MachineInfo.append("음료수가 하나도 없습니다!\n");
+            }
+            try {
+                InputStream inputStream =  machine.socket.getInputStream();
+                OutputStream outputStream =  machine.socket.getOutputStream();
 //            BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
-            byte[] messageBytes= toServerMessageSell.getBytes();
-            outputStream.write(messageBytes);
-            outputStream.flush();
-            if(toServerMessageSold != null && !toServerMessageSold.isEmpty()) {
-                messageBytes = toServerMessageSold.getBytes();
+                byte[] messageBytes = toServerMessageSell.getBytes();
                 outputStream.write(messageBytes);
                 outputStream.flush();
-                toServerMessageSold = "";
-            }
-            System.out.println("서버로 메시지를 전송했습니다.");
+                if (toServerMessageSold != null && !toServerMessageSold.isEmpty()) {
+                    messageBytes = toServerMessageSold.getBytes();
+                    outputStream.write(messageBytes);
+                    outputStream.flush();
+                }
+                System.out.println("서버로 메시지를 전송했습니다.");
 
-            // 서버로부터 데이터 수신
-            byte[] buffer = new byte[1024];
-            int bytesRead = inputStream.read(buffer);
-            String receivedMessage = new String(buffer, 0, bytesRead);
-            System.out.println("서버로부터 메시지를 수신했습니다: " + receivedMessage);
-
+                // 서버로부터 데이터 수신
+                byte[] buffer = new byte[1024];
+                int bytesRead = inputStream.read(buffer);
+                String receivedMessage = new String(buffer, 0, bytesRead);
+                System.out.println("서버로부터 메시지를 수신했습니다: " + receivedMessage);
+                if (toServerMessageSold != null && !toServerMessageSold.isEmpty()) {
+                    bytesRead = inputStream.read(buffer);
+                    receivedMessage = new String(buffer, 0, bytesRead);
+                    System.out.println("서버로부터 메시지를 수신했습니다: " + receivedMessage);
+                    toServerMessageSold = "";
+                }
 //            inputStream.close();
 //            outputStream.close();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
         }
-
+        else
+        {
+            System.out.println("비교 다름");
+        }
 
     }
 //
@@ -700,6 +698,51 @@ public class LayOut extends JFrame implements LayOutData{
                 else
                     coincount[i].setText("");
             }
+        }
+    }
+
+    boolean ConfigureArray()
+    {
+        String drinkList = "D " + machine.getUniqueNumber().toString() + " ";
+        for(int i=0; i<5; i++){
+            if(machine.getDrinks(i) != null) {
+                drinkList += machine.getDrinks(i).getName() + " ";
+                drinkList += machine.getDrinks(i).getPrice() + " ";
+                drinkList += machine.getStock(i) + " ";
+            }
+            else
+            {
+                drinkList += machine.ifNullGetName(i) + " ";
+                drinkList += machine.ifNullGetPrice(i) + " ";
+                drinkList += machine.getStock(i) + " ";
+            }
+        }
+
+        System.out.println("현황 : " + drinkList);
+
+        try {
+            InputStream inputStream =  machine.socket.getInputStream();
+            OutputStream outputStream =  machine.socket.getOutputStream();
+//            BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
+            byte[] messageBytes= drinkList.getBytes();
+            outputStream.write(messageBytes);
+            outputStream.flush();
+            System.out.println("서버로 메시지를 전송했습니다.");
+
+            // 서버로부터 데이터 수신
+            byte[] buffer = new byte[1024];
+            int bytesRead = inputStream.read(buffer);
+            String receivedMessage = new String(buffer, 0, bytesRead);
+            System.out.println("서버로부터 메시지를 수신했습니다: " + receivedMessage);
+
+            if(receivedMessage.equals("Yes"))
+                return true;
+            else
+                return false;
+            //            inputStream.close();
+            //            outputStream.close();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
     }
 }

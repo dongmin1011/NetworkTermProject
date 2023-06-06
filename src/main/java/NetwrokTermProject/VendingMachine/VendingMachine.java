@@ -6,6 +6,7 @@ import NetwrokTermProject.Money.MoneyInF;
 import NetwrokTermProject.Money.*;
 import NetwrokTermProject.Stack.Stack;
 import NetwrokTermProject.VendingMachine.Drinks.*;
+import java.net.Socket;
 
 //자판기 클래스
 public class VendingMachine{
@@ -14,10 +15,14 @@ public class VendingMachine{
 //    private MoneyInF[] money;		//자판기 잔돈 배열 객체
     private Integer input;		//돈 입력
 
+    public Socket socket;
+
     private Integer UniqueNumber = 1;
 
     private LinkedList<MoneyInF> money;     //돈 링크드리스트 객체
 
+    private String[] drinkName = new String[5];
+    private Integer[] drinkPrice = new Integer[5];
     private LinkedList<Stack> drinks;
     private LinkedList<VendingMachineDrinks> temp;
     private Admin admin = new Admin();	//자판기 관리자 클래스 생성
@@ -38,12 +43,9 @@ public class VendingMachine{
                 if (j == 2) drink.push(new SportsDrink());
                 if (j == 3) drink.push(new HighQualityCoffee());
                 if (j == 4) drink.push(new Soda());
-
-
             }
             drinks.add(drink);
             drink = new Stack<>();
-
         }
 //        temp = new LinkedList<>();
 //        temp.add(new Water());
@@ -76,6 +78,12 @@ public class VendingMachine{
 //        for(int i=0; i<5; i++){
 //            System.out.println("drinks = " + drinks.get(i).size());
 //        }
+        for(int i = 0; i < 5; i++)
+        {
+            System.out.println(this.getDrinks(i).getName() +  " " + this.getDrinks(i).getPrice());
+            drinkName[i] = this.getDrinks(i).getName();
+            drinkPrice[i] = this.getDrinks(i).getPrice();
+        }
     }
 
     public Integer getUniqueNumber()
@@ -99,8 +107,7 @@ public class VendingMachine{
         return (VendingMachineDrinks) drinks.get(n).peek();
     }
     public VendingMachineDrinks SellDrink(int n) {	//자판기 음료수 클래스 반환
-        return (VendingMachineDrinks) drinks.get(n).pop();
-    }
+        return (VendingMachineDrinks) drinks.get(n).pop(); }
     public int getStock(int n){
         return drinks.get(n).size();
     }
@@ -113,6 +120,8 @@ public class VendingMachine{
 //    }
     public void updateDrink(String name, int price , int n){
         drinks.get(n).updateStack(new OtherDrink(name, price));
+        drinkName[n] = name;
+        drinkPrice[n] = price;
     }
     public MoneyInF getMoney(int n) {		//자판기의 돈 클래스 반환
         return money.get(n);
@@ -133,7 +142,9 @@ public class VendingMachine{
         return input.intValue();
     }
 
+    public String ifNullGetName(int index) {return drinkName[index];}
 
+    public int ifNullGetPrice(int index) {return drinkPrice[index];}
 }
 
 
