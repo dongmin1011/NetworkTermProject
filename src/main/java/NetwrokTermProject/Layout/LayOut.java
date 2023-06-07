@@ -228,7 +228,7 @@ public class LayOut extends JFrame implements LayOutData{
         for(int i=0; i<5; i++){
             drinkList += machine.getDrinks(i).getName() + " ";
             drinkList += machine.getDrinks(i).getPrice() + " ";
-            drinkList += machine.getDrinks(i).getStock() + " ";
+            drinkList += machine.getStock(i) + " ";
         }
 
         System.out.println(drinkList);
@@ -452,7 +452,7 @@ public class LayOut extends JFrame implements LayOutData{
                 int temp = 0;
 //                adminframe.setVisible(false);					//관리자 모드가 켜져있는 상태에서 반환버튼을 누르면 관리자 모드 자동 종료
 //                adminframe.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-
+//                System.out.println("machine = " + machine.getStock(n));
 
                 for(int i=0; i<inputmoneylist.size(); ) {							//돈을 하나도 사용 안했을때
                     for(int j=0; j<5; j++) {
@@ -620,6 +620,10 @@ public class LayOut extends JFrame implements LayOutData{
                     drink_name[i].setText(drinkName[i]);
                     Drink_price[i].setText("<HTML>"+ Integer.toString(drinkPrice[i])+"원</HTML>");
 
+                }
+                String server = MachineInfo.getText();
+                if(server.contains("서버와 데이터 불일치")){
+                    MachineInfo.setText(server.replace("서버와 데이터 불일치!\n관리자에게 동기화를 요청하세요!\n", ""));
                 }
 
             }

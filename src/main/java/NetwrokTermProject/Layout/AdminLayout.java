@@ -43,6 +43,9 @@ public class AdminLayout  extends JFrame implements LayOutData{
     JButton AddMoney = new JButton("돈 추가");
     //관리자 창의 메인 정보를 출력하는 레이블과 버튼들 선언
 
+
+    JButton sync = new JButton("동기화");
+
     public AdminLayout() {
         adminframe.setTitle("관리자 모드");
         adminframe.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
@@ -51,11 +54,18 @@ public class AdminLayout  extends JFrame implements LayOutData{
         AdminGrid.setLayout(new GridLayout(5,3,10,30));			//관리자 버튼패널읠 GridLayout으로 5행 3열로 생성
 
         JPanel textPanel = new JPanel();
+
+        textPanel.setLayout(new FlowLayout(FlowLayout.CENTER));
         JLabel text = new JLabel("자판기 관리자 메뉴");
+//        title.add(text);
+
+
         text.setFont(new Font("맑은 고딕", Font.BOLD, 20));
         textPanel.setPreferredSize(new Dimension(560, 40));
         textPanel.setBackground(Color.yellow);
         textPanel.add(text);
+        textPanel.add(sync);
+
 
         JPanel adminPanel = new JPanel();
 
@@ -226,6 +236,47 @@ public class AdminLayout  extends JFrame implements LayOutData{
         AdminAdditional[2].addActionListener(e->changeDrink(2));
         AdminAdditional[3].addActionListener(e->changeDrink(3));
         AdminAdditional[4].addActionListener(e->changeDrink(4));
+
+        sync.addActionListener((e->synchronization()));
+    }
+    void synchronization(){
+        try {
+            String request = "Request";
+
+            InputStream inputStream =  machine.socket.getInputStream();
+            OutputStream outputStream =  machine.socket.getOutputStream();
+//            BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
+            byte[] messageBytes= request.getBytes();
+            outputStream.write(messageBytes);
+            outputStream.flush();
+            System.out.println("서버로 메시지를 전송했습니다."); // 서버로 보내기
+
+            // 서버로부터 데이터 수신
+            byte[] buffer = new byte[1024];
+            int bytesRead = inputStream.read(buffer);
+            String receivedMessage = new String(buffer, 0, bytesRead);
+            System.out.println("서버로부터 메시지를 수신했습니다: " + receivedMessage);
+
+            String[] words = receivedMessage.split(" ");
+
+            String [] names = new String [5];
+            int [] prices = new int [5];
+
+
+            for (int i = 0; i < words.length; i += 2) {
+                names[i / 2] = words[i];
+                prices[i / 2] = Integer.parseInt(words[i + 1]);
+            }
+            for(int i=0; i<5; i++){
+                machine.updateDrink(names[i], prices[i], i);
+            }
+
+
+
+        }catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
     }
     void dataClear() {						//관리자 Info의 초기화
         InfoText.setText("");
@@ -244,11 +295,11 @@ public class AdminLayout  extends JFrame implements LayOutData{
             if (machine.getStock(n) < 10) {    //만약 음료수의 개수가 10개 이하라면
 //            drinkbutton[n].setText("");				//drinkbutton을 ""로 초기화(품절표시를 없앰)
 //            machine.getDrinks(n).Add();				//자판기의 음료수 개수 증가
-                if (n == 0) machine.inputDrinks(new Water(), n);
-                else if (n == 1) machine.inputDrinks(new Coffee(), n);
-                else if (n == 2) machine.inputDrinks(new SportsDrink(), n);
-                else if (n == 3) machine.inputDrinks(new HighQualityCoffee(), n);
-                else if (n == 4) machine.inputDrinks(new Soda(), n);
+                if (n == 0) machine.inputDrinks(new OtherDrink(drinkName[n],drinkPrice[n] ), n);
+                else if (n == 1) machine.inputDrinks(new OtherDrink(drinkName[n],drinkPrice[n] ), n);
+                else if (n == 2) machine.inputDrinks(new OtherDrink(drinkName[n],drinkPrice[n] ), n);
+                else if (n == 3) machine.inputDrinks(new OtherDrink(drinkName[n],drinkPrice[n] ), n);
+                else if (n == 4) machine.inputDrinks(new OtherDrink(drinkName[n],drinkPrice[n] ), n);
 //            String s = MachineInfo.getText();
                 String tempdrinkname = drinkName[n];
                 UpdateListForServer(n);
