@@ -251,6 +251,7 @@ public class AdminLayout  extends JFrame implements LayOutData{
                 else if (n == 4) machine.inputDrinks(new Soda(), n);
 //            String s = MachineInfo.getText();
                 String tempdrinkname = drinkName[n];
+                UpdateListForServer(n);
                 tempdrinkname += " 품절\n";
 //            if(s.contains(tempdrinkname)) {				//만약 품절 표시가 있다면 음료수를 추가 했으므로 지워줌
 //                s = s.replace(tempdrinkname, "");
@@ -340,6 +341,7 @@ if(ConfigureArray()) {
 
 //                    machine.updateDrink(s, machine.getDrinks(n).getPrice(), n);//음료수의 이름 변경
                     machine.updateDrink(s, drinkPrice[n], n);
+                    UpdateListForServer(n);
 //                    for(int i=0; i<3;i++){
 //                        System.out.println("machine = " + machine.SellDrink(n).getName());
 //                    }
@@ -375,8 +377,7 @@ if(ConfigureArray()) {
 
 //                    machine.updateDrink(s, , n); //음료수의 가격 변경
                     machine.updateDrink(drinkName[n], price, n);
-                    drinkPrice[n] = price;
-
+                    UpdateListForServer(n);
                 } else {
                     Textlabel.setText("정확히 입력하세요"); //length가 0이면 변경 불가
                     inputfield[1].setText("");
@@ -633,6 +634,41 @@ else{
                 return false; // 일치 불일치 확인
             //            inputStream.close();
             //            outputStream.close();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    void UpdateListForServer(int index)
+    {
+        String drinkList = "E " + machine.getUniqueNumber().toString() + " " + index + " ";
+        if(machine.getDrinks(index) != null) {
+            drinkList += machine.getDrinks(index).getName() + " ";
+            drinkList += machine.getDrinks(index).getPrice() + " ";
+            drinkList += machine.getStock(index) + " ";
+        }
+        else
+        {
+            drinkList += machine.ifNullGetName(index) + " ";
+            drinkList += machine.ifNullGetPrice(index) + " ";
+            drinkList += machine.getStock(index) + " ";
+        }
+
+        try {
+            InputStream inputStream =  machine.socket.getInputStream();
+            OutputStream outputStream =  machine.socket.getOutputStream();
+//            BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
+            byte[] messageBytes= drinkList.getBytes();
+            outputStream.write(messageBytes);
+            outputStream.flush();
+            System.out.println("서버로 메시지를 전송했습니다."); // 서버로 보내기
+
+            // 서버로부터 데이터 수신
+            byte[] buffer = new byte[1024];
+            int bytesRead = inputStream.read(buffer);
+            String receivedMessage = new String(buffer, 0, bytesRead);
+            System.out.println("서버로부터 메시지를 수신했습니다: " + receivedMessage); // 받기
+
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
