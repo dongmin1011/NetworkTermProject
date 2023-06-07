@@ -431,6 +431,7 @@ public class LayOut extends JFrame implements LayOutData{
         else
         {
             System.out.println("비교 다름");
+            MachineInfo.append("서버와 데이터 불일치!\n관리자에게 동기화를 요청하세요!\n");
         }
 
     }

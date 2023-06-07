@@ -238,19 +238,20 @@ public class AdminLayout  extends JFrame implements LayOutData{
         }
     }
     void AccessDrinks(int n) {						//음료수 보충 함수
-        InfoText.setText("");
-        dataClear();								//Info초기화
-        if(machine.getStock(n) <10) {	//만약 음료수의 개수가 10개 이하라면
+        if(ConfigureArray()) {
+            InfoText.setText("");
+            dataClear();                                //Info초기화
+            if (machine.getStock(n) < 10) {    //만약 음료수의 개수가 10개 이하라면
 //            drinkbutton[n].setText("");				//drinkbutton을 ""로 초기화(품절표시를 없앰)
 //            machine.getDrinks(n).Add();				//자판기의 음료수 개수 증가
-            if(n==0) machine.inputDrinks(new Water(), n);
-            else if(n==1) machine.inputDrinks(new Coffee(), n);
-            else if(n==2) machine.inputDrinks(new SportsDrink(), n);
-            else if(n==3) machine.inputDrinks(new HighQualityCoffee(), n);
-            else if(n==4)machine.inputDrinks(new Soda(), n);
+                if (n == 0) machine.inputDrinks(new Water(), n);
+                else if (n == 1) machine.inputDrinks(new Coffee(), n);
+                else if (n == 2) machine.inputDrinks(new SportsDrink(), n);
+                else if (n == 3) machine.inputDrinks(new HighQualityCoffee(), n);
+                else if (n == 4) machine.inputDrinks(new Soda(), n);
 //            String s = MachineInfo.getText();
-            String tempdrinkname = drinkName[n];
-            tempdrinkname += " 품절\n";
+                String tempdrinkname = drinkName[n];
+                tempdrinkname += " 품절\n";
 //            if(s.contains(tempdrinkname)) {				//만약 품절 표시가 있다면 음료수를 추가 했으므로 지워줌
 //                s = s.replace(tempdrinkname, "");
 //                MachineInfo.setText(s);
@@ -259,20 +260,20 @@ public class AdminLayout  extends JFrame implements LayOutData{
 //                s = s.replace("음료수가 하나도 없습니다!\n", "");
 //                MachineInfo.setText(s);
 //            }
-            Calendar today = Calendar.getInstance();
-            file.ExhaustionFileWrite(today.get(Calendar.YEAR )+"년 "+getToday(today.get(Calendar.MONTH )+1)+"월 "+getToday(today.get(Calendar.DATE ))+"일 "
-                    + getToday(today.get(Calendar.HOUR_OF_DAY ))+"시 "+getToday(today.get(Calendar.MINUTE ))+"분 " +
-                    drinkName[n] +" 추가", true);		//음료수를 추가한 날짜를 파일에 저장
+                Calendar today = Calendar.getInstance();
+                file.ExhaustionFileWrite(today.get(Calendar.YEAR) + "년 " + getToday(today.get(Calendar.MONTH) + 1) + "월 " + getToday(today.get(Calendar.DATE)) + "일 "
+                        + getToday(today.get(Calendar.HOUR_OF_DAY)) + "시 " + getToday(today.get(Calendar.MINUTE)) + "분 " +
+                        drinkName[n] + " 추가", true);        //음료수를 추가한 날짜를 파일에 저장
 
+            } else InfoText.setText("10개 이상 보충 불가");        //만약 음료의 개수가 10개 이상 증가하면 보충 불가
+
+            for (int i = 0; i < 5; i++) {                            //음료수의 재고 변화를 업데이트
+                info_label[i].setText(drinkName[i]);
+                info_num[i].setText(Integer.toString(machine.getStock(i)) + "개");
+            }
+        } else{
+            InfoText.setText("서버와 불일치! 동기화 필요!\n");
         }
-
-        else InfoText.setText("10개 이상 보충 불가");		//만약 음료의 개수가 10개 이상 증가하면 보충 불가
-
-        for(int i=0; i<5; i++) {							//음료수의 재고 변화를 업데이트
-            info_label[i].setText(drinkName[i]);
-            info_num[i].setText(Integer.toString(machine.getStock(i))+ "개");
-        }
-
     }
     void changeDrink(int n) {                //음료수의 이름과 가격 변경
 if(ConfigureArray()) {
@@ -396,7 +397,9 @@ if(ConfigureArray()) {
         changeframe.setSize(400, 200);
         changeframe.setVisible(true);
     }
-else{}
+else{
+    InfoText.setText("서버와 불일치! 동기화 필요!\n");
+}
     }
     void collectmoney(int n) {			//수금하기 버튼 클릭 시 동작
         InfoText.setText("");
@@ -590,7 +593,7 @@ else{}
         }
     }
 
-    boolean ConfigureArray()
+    boolean ConfigureArray() // 서버와 데이터 일치 확인
     {
         String drinkList = "D " + machine.getUniqueNumber().toString() + " ";
         for(int i=0; i<5; i++){
@@ -605,7 +608,7 @@ else{}
                 drinkList += machine.ifNullGetPrice(i) + " ";
                 drinkList += machine.getStock(i) + " ";
             }
-        }
+        } // 리스트를 한 문자열로 변환
 
         System.out.println("현황 : " + drinkList);
 
@@ -616,18 +619,18 @@ else{}
             byte[] messageBytes= drinkList.getBytes();
             outputStream.write(messageBytes);
             outputStream.flush();
-            System.out.println("서버로 메시지를 전송했습니다.");
+            System.out.println("서버로 메시지를 전송했습니다."); // 서버로 보내기
 
             // 서버로부터 데이터 수신
             byte[] buffer = new byte[1024];
             int bytesRead = inputStream.read(buffer);
             String receivedMessage = new String(buffer, 0, bytesRead);
-            System.out.println("서버로부터 메시지를 수신했습니다: " + receivedMessage);
+            System.out.println("서버로부터 메시지를 수신했습니다: " + receivedMessage); // 비교한 것 받기
 
             if(receivedMessage.equals("Yes"))
                 return true;
             else
-                return false;
+                return false; // 일치 불일치 확인
             //            inputStream.close();
             //            outputStream.close();
         } catch (IOException e) {
